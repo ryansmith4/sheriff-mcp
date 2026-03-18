@@ -1,0 +1,317 @@
+:root {
+  --sl-color-accent-low: #451a03;
+  --sl-color-accent: #d97706;
+  --sl-color-accent-high: #fcd34d;
+  --sl-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --sl-content-width: 52rem;
+}
+
+[data-theme='dark'] {
+  --sl-color-accent-low: #451a03;
+  --sl-color-accent: #f59e0b;
+  --sl-color-accent-high: #fef3c7;
+}
+
+/* ── Mermaid diagram theme (amber palette matching site accents) ────────── */
+
+:root {
+  --mmd-node-fill: #fef3c7;
+  --mmd-node-stroke: #d97706;
+  --mmd-node-text: #451a03;
+  --mmd-edge-stroke: #f59e0b;
+  --mmd-edge-label-bg: #fffbeb;
+  --mmd-edge-label-text: #451a03;
+  --mmd-cluster-fill: #fffbeb;
+  --mmd-cluster-stroke: #fcd34d;
+  --mmd-cluster-text: #451a03;
+  --mmd-marker-fill: #f59e0b;
+  --mmd-title-text: #451a03;
+  /* Sequence diagram */
+  --mmd-actor-fill: #fef3c7;
+  --mmd-actor-stroke: #d97706;
+  --mmd-actor-text: #451a03;
+  --mmd-signal-stroke: #f59e0b;
+  --mmd-signal-text: #451a03;
+  --mmd-note-fill: #dbeafe;
+  --mmd-note-stroke: #3b82f6;
+  --mmd-note-text: #1e3a5f;
+  --mmd-activation-fill: #fde68a;
+  --mmd-activation-stroke: #d97706;
+  --mmd-loop-fill: rgba(254, 243, 199, 0.3);
+  /* ER diagram */
+  --mmd-er-entity-fill: #fef3c7;
+  --mmd-er-entity-stroke: #d97706;
+  --mmd-er-attr-odd: #fffbeb;
+  --mmd-er-attr-even: #fef3c7;
+  --mmd-er-line-stroke: #f59e0b;
+}
+
+[data-theme='dark'] {
+  --mmd-node-fill: #451a03;
+  --mmd-node-stroke: #f59e0b;
+  --mmd-node-text: #e2e8f0;
+  --mmd-edge-stroke: #f59e0b;
+  --mmd-edge-label-bg: #1c1917;
+  --mmd-edge-label-text: #e2e8f0;
+  --mmd-cluster-fill: #1c1917;
+  --mmd-cluster-stroke: #d97706;
+  --mmd-cluster-text: #e2e8f0;
+  --mmd-marker-fill: #f59e0b;
+  --mmd-title-text: #e2e8f0;
+  /* Sequence diagram */
+  --mmd-actor-fill: #451a03;
+  --mmd-actor-stroke: #f59e0b;
+  --mmd-actor-text: #e2e8f0;
+  --mmd-signal-stroke: #f59e0b;
+  --mmd-signal-text: #e2e8f0;
+  --mmd-note-fill: #172554;
+  --mmd-note-stroke: #eab308;
+  --mmd-note-text: #fef9c3;
+  --mmd-activation-fill: #451a03;
+  --mmd-activation-stroke: #f59e0b;
+  --mmd-loop-fill: rgba(69, 26, 3, 0.4);
+  /* ER diagram */
+  --mmd-er-entity-fill: #451a03;
+  --mmd-er-entity-stroke: #f59e0b;
+  --mmd-er-attr-odd: #1c1917;
+  --mmd-er-attr-even: #451a03;
+  --mmd-er-line-stroke: #f59e0b;
+}
+
+/* Left-align diagrams and remove default label width cap */
+pre.mermaid {
+  justify-content: flex-start !important;
+}
+pre.mermaid .nodeLabel {
+  max-width: none !important;
+  white-space: nowrap !important;
+}
+
+/* — Flowchart / general nodes — */
+pre.mermaid .node rect,
+pre.mermaid .node circle,
+pre.mermaid .node ellipse,
+pre.mermaid .node polygon,
+pre.mermaid .node path {
+  fill: var(--mmd-node-fill) !important;
+  stroke: var(--mmd-node-stroke) !important;
+}
+pre.mermaid .label,
+pre.mermaid .nodeLabel,
+pre.mermaid .label text,
+pre.mermaid span {
+  fill: var(--mmd-node-text) !important;
+  color: var(--mmd-node-text) !important;
+}
+pre.mermaid .edgePath .path,
+pre.mermaid .flowchart-link {
+  stroke: var(--mmd-edge-stroke) !important;
+}
+pre.mermaid .marker,
+pre.mermaid .arrowheadPath,
+pre.mermaid .root .anchor path {
+  fill: var(--mmd-marker-fill) !important;
+  stroke: var(--mmd-marker-fill) !important;
+}
+pre.mermaid .edgeLabel {
+  background-color: var(--mmd-edge-label-bg) !important;
+  color: var(--mmd-edge-label-text) !important;
+}
+pre.mermaid .edgeLabel rect {
+  fill: var(--mmd-edge-label-bg) !important;
+}
+pre.mermaid .edgeLabel p {
+  background-color: var(--mmd-edge-label-bg) !important;
+}
+pre.mermaid .cluster rect {
+  fill: var(--mmd-cluster-fill) !important;
+  stroke: var(--mmd-cluster-stroke) !important;
+}
+pre.mermaid .cluster-label text,
+pre.mermaid .cluster-label span {
+  fill: var(--mmd-cluster-text) !important;
+  color: var(--mmd-cluster-text) !important;
+}
+pre.mermaid .flowchartTitleText {
+  fill: var(--mmd-title-text) !important;
+}
+
+/* — Sequence diagrams — */
+pre.mermaid .actor {
+  fill: var(--mmd-actor-fill) !important;
+  stroke: var(--mmd-actor-stroke) !important;
+}
+pre.mermaid .actor-man circle,
+pre.mermaid .actor-man line {
+  fill: var(--mmd-actor-fill) !important;
+  stroke: var(--mmd-actor-stroke) !important;
+}
+pre.mermaid text.actor {
+  fill: var(--mmd-actor-text) !important;
+}
+pre.mermaid .messageLine0,
+pre.mermaid .messageLine1 {
+  stroke: var(--mmd-signal-stroke) !important;
+}
+pre.mermaid .messageText {
+  fill: var(--mmd-signal-text) !important;
+}
+pre.mermaid #arrowhead path {
+  fill: var(--mmd-signal-stroke) !important;
+  stroke: var(--mmd-signal-stroke) !important;
+}
+pre.mermaid .note,
+pre.mermaid .note rect,
+pre.mermaid .note path,
+pre.mermaid .note line {
+  fill: var(--mmd-note-fill) !important;
+  stroke: var(--mmd-note-stroke) !important;
+  stroke-width: 2px !important;
+}
+pre.mermaid .noteText,
+pre.mermaid .noteText > tspan {
+  fill: var(--mmd-note-text) !important;
+}
+pre.mermaid .activation0,
+pre.mermaid .activation1,
+pre.mermaid .activation2 {
+  fill: var(--mmd-activation-fill) !important;
+  stroke: var(--mmd-activation-stroke) !important;
+}
+pre.mermaid .loopLine {
+  stroke: var(--mmd-cluster-stroke) !important;
+}
+pre.mermaid .loopText,
+pre.mermaid .loopText tspan {
+  fill: var(--mmd-cluster-text) !important;
+}
+pre.mermaid .labelBox {
+  fill: var(--mmd-loop-fill) !important;
+  stroke: var(--mmd-cluster-stroke) !important;
+}
+
+/* — ER diagrams — */
+pre.mermaid .er.entityBox {
+  fill: var(--mmd-er-entity-fill) !important;
+  stroke: var(--mmd-er-entity-stroke) !important;
+}
+pre.mermaid .er.entityLabel {
+  fill: var(--mmd-node-text) !important;
+}
+pre.mermaid .er.attributeBoxOdd {
+  fill: var(--mmd-er-attr-odd) !important;
+  stroke: var(--mmd-er-entity-stroke) !important;
+}
+pre.mermaid .er.attributeBoxEven {
+  fill: var(--mmd-er-attr-even) !important;
+  stroke: var(--mmd-er-entity-stroke) !important;
+}
+pre.mermaid .er.relationshipLine {
+  stroke: var(--mmd-er-line-stroke) !important;
+}
+pre.mermaid .er.relationshipLabel {
+  fill: var(--mmd-edge-label-text) !important;
+}
+
+/* ── TOC collapse/expand ───────────────────────────────────────────────── */
+
+@media (min-width: 72rem) {
+  html[data-toc-hidden] .right-sidebar-container {
+    width: 0 !important;
+    overflow: hidden;
+  }
+
+  html[data-toc-hidden] .right-sidebar {
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  html[data-toc-hidden] .right-sidebar starlight-toc {
+    display: none;
+  }
+
+  html[data-toc-hidden] .main-pane {
+    width: 100% !important;
+  }
+
+  html[data-toc-hidden] .content-panel .sl-container {
+    max-width: none;
+  }
+}
+
+/* ── Sheriff-specific styles ───────────────────────────────────────────── */
+
+/* Hero section styling for landing page */
+.hero-section {
+  background: linear-gradient(to bottom right, #fffbeb, #f1f5f9);
+}
+
+:root[data-theme='dark'] .hero-section {
+  background: linear-gradient(to bottom right, #1c1917, #1e293b);
+}
+
+/* Feature cards */
+.feature-card {
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  padding: 1.5rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  transition: box-shadow 0.2s;
+}
+
+.feature-card:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+:root[data-theme='dark'] .feature-card {
+  border-color: #334155;
+  background-color: #1e293b;
+}
+
+/* Status badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-badge--fixed {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.status-badge--skip {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+:root[data-theme='dark'] .status-badge--fixed {
+  background-color: #14532d;
+  color: #86efac;
+}
+
+:root[data-theme='dark'] .status-badge--skip {
+  background-color: #78350f;
+  color: #fcd34d;
+}
+
+/* Action badge */
+.action-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-family: monospace;
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+:root[data-theme='dark'] .action-badge {
+  background-color: #451a03;
+  color: #fcd34d;
+}

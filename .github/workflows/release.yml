@@ -1,0 +1,109 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  id-token: write  # Required for Sigstore OIDC signing and MCP Registry
+  packages: write  # Required for ghcr.io Docker push
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for changelog generation
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build and test
+        run: ./gradlew build
+
+      - name: Build fat JAR
+        run: ./gradlew fatJar
+
+      - name: Run JReleaser
+        run: ./gradlew jreleaserFullRelease
+        env:
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JRELEASER_COSIGN_EXPERIMENTAL: true
+
+  docker:
+    needs: release
+    if: ${{ !contains(github.ref_name, '-') }}  # Skip pre-releases (e.g., v1.0.0-beta1)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build and push Docker image
+        run: |
+          MAJOR=$(echo "${{ steps.version.outputs.version }}" | cut -d. -f1)
+          ./gradlew jib -Djib.to.tags=${{ steps.version.outputs.version }},$MAJOR,latest
+        env:
+          JIB_USERNAME: ${{ github.actor }}
+          JIB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign Docker image with Sigstore
+        run: |
+          IMAGE="ghcr.io/ryansmith4/sheriff-mcp"
+          DIGEST=$(cat build/jib-image.digest)
+          echo "Signing ${IMAGE}@${DIGEST}"
+          cosign sign --yes "${IMAGE}@${DIGEST}"
+
+  mcp-registry:
+    needs: docker
+    if: ${{ !contains(github.ref_name, '-') }}  # Skip pre-releases
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Update server.json for publish
+        run: |
+          jq --arg ver "${{ steps.version.outputs.version }}" \
+             --arg img "ghcr.io/ryansmith4/sheriff-mcp:${{ steps.version.outputs.version }}" \
+             '.version = $ver | .packages[0].identifier = $img | .packages[0].version = $ver' \
+             server.json > server.tmp.json
+          mv server.tmp.json server.json
+
+      - name: Install mcp-publisher
+        run: |
+          curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
+
+      - name: Publish to MCP Registry
+        run: |
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish

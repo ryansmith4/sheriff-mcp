@@ -1,0 +1,74 @@
+---
+title: Installation
+description: Download and install Sheriff MCP server
+---
+
+import { Tabs, TabItem, Aside, Steps } from '@astrojs/starlight/components';
+
+Sheriff can be installed via Docker, JAR download, or by building from source.
+
+## Docker
+
+```bash
+docker pull ghcr.io/ryansmith4/sheriff-mcp:latest
+```
+
+No Java installation required. See [Agent Setup](/sheriff-mcp/getting-started/agent-setup/) for MCP client configuration with Docker.
+
+## MCP Registry
+
+Clients that support the [MCP Registry](https://registry.modelcontextprotocol.io/) can install Sheriff directly by name:
+
+```
+io.github.ryansmith4/sheriff-mcp
+```
+
+## JAR Download
+
+<Steps>
+1. Download the latest `sheriff-mcp-X.Y.Z-all.jar` from [GitHub Releases](https://github.com/ryansmith4/sheriff-mcp/releases)
+
+2. Place it in a location of your choice (e.g., `~/tools/` or `C:\tools\`)
+
+3. Run with Java:
+   ```bash
+   java -jar sheriff-mcp-X.Y.Z-all.jar start
+   ```
+</Steps>
+
+<Aside type="note">
+The `-all.jar` is a fat JAR containing all dependencies. No additional setup required beyond Java.
+</Aside>
+
+## Build from Source
+
+```bash
+git clone https://github.com/ryansmith4/sheriff-mcp.git
+cd sheriff-mcp
+./gradlew fatJar
+# JAR at build/libs/sheriff-mcp-*-all.jar
+```
+
+## Verify Installation
+
+```bash
+java -jar sheriff-mcp-X.Y.Z-all.jar --version
+# Sheriff X.Y.Z
+```
+
+## Requirements
+
+- **Java 21+** is required (for JAR and build from source — not needed for Docker)
+- Verify with: `java -version`
+
+<Aside type="tip">
+If you don't have Java 21+, we recommend installing via:
+- **macOS/Linux**: `brew install openjdk@21`
+- **Windows**: [Eclipse Temurin](https://adoptium.net/temurin/releases/?version=21)
+</Aside>
+
+## Next Steps
+
+Once installed, configure your MCP client to use Sheriff:
+
+- [Agent Setup](/sheriff-mcp/getting-started/agent-setup/) - Configure Claude Code, Cursor, ChatGPT Desktop, or other MCP clients

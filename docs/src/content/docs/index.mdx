@@ -1,0 +1,151 @@
+---
+title: Sheriff
+description: AI-powered static analysis issue fixer - MCP server for SARIF reports
+template: splash
+hero:
+  tagline: AI agents struggle with large static analysis reports. Sheriff makes them efficient.
+  actions:
+    - text: Get Started
+      link: /sheriff-mcp/getting-started/installation/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/ryansmith4/sheriff-mcp
+      icon: external
+---
+
+import { Card, CardGrid, LinkCard, Aside, Steps } from '@astrojs/starlight/components';
+
+## The Problem
+
+AI agents struggle with large static analysis reports:
+
+<CardGrid>
+  <Card title="Context Overload" icon="warning">
+    100+ issues overwhelm context windows, causing agents to lose track of progress
+  </Card>
+  <Card title="Lost Progress" icon="close">
+    Work is lost on context compaction or session restart
+  </Card>
+  <Card title="Inefficient Navigation" icon="random">
+    No batching means jumping between files repeatedly, wasting tokens
+  </Card>
+</CardGrid>
+
+## The Solution
+
+Sheriff provides a work queue manager for AI agents fixing static analysis issues:
+
+<CardGrid stagger>
+  <Card title="Intelligent Batching" icon="list-format">
+    Issues grouped by file for efficient fixing - fix all issues in one file before moving to the next
+  </Card>
+  <Card title="Persistent Progress" icon="seti:db">
+    State survives compaction, restarts, and agent switches via embedded H2 database
+  </Card>
+  <Card title="Scope Filtering" icon="magnifier">
+    Focus on specific rules, severities, or file patterns
+  </Card>
+  <Card title="Compact Responses" icon="rocket">
+    Minimal context usage with abbreviated field names
+  </Card>
+</CardGrid>
+
+## Supported Static Analysis Tools
+
+Sheriff works with any tool that produces SARIF output:
+
+| Tool | Language | SARIF Command |
+|------|----------|---------------|
+| **Qodana** | Java/Kotlin/JS/Python | `qodana scan` (SARIF output is default) |
+| **Semgrep** | Multi-language | `semgrep --sarif -o results.sarif` |
+| **ESLint** | JavaScript/TypeScript | `eslint --format @microsoft/sarif` |
+| **CodeQL** | Multi-language | Built-in SARIF output |
+| **SonarQube** | Multi-language | Export as SARIF (via plugin) |
+| **SpotBugs** | Java | `spotbugs -sarif` |
+| **Bandit** | Python | `bandit -f sarif` |
+| **Checkov** | IaC | `checkov -o sarif` |
+| **Trivy** | Container/IaC | `trivy --format sarif` |
+
+## The Workflow
+
+<Steps>
+1. **Run static analysis** - Generate SARIF output from your tool of choice
+2. **Load into Sheriff** - `sheriff load target="results.sarif"`
+3. **Get next file's issues** - `sheriff next` returns all issues in one file
+4. **Fix all issues in file** - Edit the code to resolve each issue
+5. **Mark as done** - `sheriff done fps=[...] status="fixed"`
+6. **Repeat** - Until `remaining = 0`
+</Steps>
+
+## Quick Example
+
+```
+User: "Fix all ConstantValue issues in my codebase"
+
+Agent: sheriff load target="build/qodana/qodana.sarif.json"
+       → 136 total issues, 22 ConstantValue, 15 unused...
+
+Agent: sheriff next scope={rule: "ConstantValue"}
+       → 3 issues in Service.java with code snippets
+
+Agent: [reads Service.java, fixes all 3 issues]
+
+Agent: sheriff done fps=["88d32cab", "ab1c2d3e", "f9e8d7c6"] status="fixed"
+       → 3 marked fixed, 19 remaining
+
+Agent: sheriff next scope={rule: "ConstantValue"}
+       → 2 issues in Repository.java...
+
+       ... continues until remaining = 0
+```
+
+## Next Steps
+
+<CardGrid>
+  <LinkCard
+    title="Installation"
+    description="Download the JAR or use Docker"
+    href="/sheriff-mcp/getting-started/installation/"
+  />
+  <LinkCard
+    title="Agent Setup"
+    description="Configure Claude Code or other MCP clients"
+    href="/sheriff-mcp/getting-started/agent-setup/"
+  />
+  <LinkCard
+    title="Tool Reference"
+    description="Learn all Sheriff actions and parameters"
+    href="/sheriff-mcp/tools/"
+  />
+  <LinkCard
+    title="Best Practices"
+    description="Tips for efficient static analysis fixing"
+    href="/sheriff-mcp/guides/best-practices/"
+  />
+</CardGrid>
+
+## Requirements
+
+<Aside type="note">
+Sheriff requires the following to run:
+- **Java 21+** (OpenJDK, Eclipse Temurin, or GraalVM recommended)
+- **MCP-compatible client** - See list below
+- **SARIF file** from your static analysis tool
+</Aside>
+
+### Supported MCP Clients
+
+Sheriff works with any client that supports the [Model Context Protocol](https://modelcontextprotocol.io/):
+
+| Client | Type | Notes |
+|--------|------|-------|
+| **Claude Code** | CLI | Anthropic's official CLI |
+| **Claude Desktop** | Desktop App | Anthropic's desktop application |
+| **ChatGPT Desktop** | Desktop App | OpenAI adopted MCP in March 2025 |
+| **Cursor** | IDE | AI-native code editor |
+| **Windsurf** | IDE | Codeium's AI IDE |
+| **Zed** | Editor | High-performance editor with MCP |
+| **Continue** | VS Code Extension | Open-source AI assistant |
+| **Cline** | VS Code Extension | Autonomous coding agent |
+| **Cody** | Multi-platform | Sourcegraph's AI assistant |

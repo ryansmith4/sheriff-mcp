@@ -1,0 +1,117 @@
+---
+title: "progress"
+description: Check current session progress
+---
+
+The `progress` action shows your current fixing progress. Use it to check how much work remains.
+
+## Request
+
+```json
+{
+  "action": "progress",
+  "scope": {"rule": "ConstantValue"}
+}
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `scope` | object | No | Filter to check progress within specific scope |
+
+## Response
+
+```json
+{
+  "total": 136,
+  "fixed": 115,
+  "skip": 2,
+  "rem": 19,
+  "filesOk": 25,
+  "filesRem": 7
+}
+```
+
+### Response Fields
+
+| Field | Description |
+|-------|-------------|
+| `total` | Total issues in scope |
+| `fixed` | Issues marked as fixed |
+| `skip` | Issues marked as skipped |
+| `rem` | Remaining (pending) issues |
+| `filesOk` | Files with all issues resolved |
+| `filesRem` | Remaining files with issues |
+| `scope` | Applied scope filter (present when scope was specified) |
+
+## Examples
+
+### Overall Progress
+```json
+{"action": "progress"}
+```
+
+Response:
+```json
+{
+  "total": 136,
+  "fixed": 115,
+  "skip": 2,
+  "rem": 19,
+  "filesOk": 25,
+  "filesRem": 7
+}
+```
+
+### Progress for Specific Rule
+```json
+{"action": "progress", "scope": {"rule": "ConstantValue"}}
+```
+
+Response:
+```json
+{
+  "scope": {"rule": "ConstantValue"},
+  "total": 22,
+  "fixed": 19,
+  "skip": 0,
+  "rem": 3,
+  "filesOk": 8,
+  "filesRem": 2
+}
+```
+
+### Progress for High Severity Only
+```json
+{"action": "progress", "scope": {"severity": "High"}}
+```
+
+## Use Cases
+
+### Check Overall Status
+Before starting or after a break, check where you are:
+```json
+{"action": "progress"}
+```
+
+### Verify Scope Completion
+After focusing on a specific rule, confirm it's done:
+```json
+{"action": "progress", "scope": {"rule": "ConstantValue"}}
+// rem: 0 means all ConstantValue issues are handled
+```
+
+### Report to User
+When the user asks "how much is left?":
+```json
+{"action": "progress"}
+// "19 issues remaining across 7 files"
+```
+
+## Error Cases
+
+| Error Code | Cause | Solution |
+|------------|-------|----------|
+| `SARIF_NOT_LOADED` | No SARIF file has been loaded | Call `load` first |
+| `DB_ERROR` | Database error occurred | Check `.sheriff/` directory permissions |

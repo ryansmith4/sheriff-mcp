@@ -1,0 +1,157 @@
+---
+title: State Persistence
+description: How Sheriff stores and manages progress state
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Sheriff maintains persistent state to track your progress across sessions, context compaction, and agent switches.
+
+## Storage Location
+
+State is stored in the `.sheriff/` directory (relative to the working directory):
+
+```
+.sheriff/
+├── sheriff.mv.db        # H2 database with issues and progress
+├── sheriff.log          # Application logs
+└── sheriff.*.log.gz     # Rotated log archives
+```
+
+<Aside type="tip">
+Add `.sheriff/` to your `.gitignore` to avoid committing session state to version control.
+</Aside>
+
+## What's Persisted
+
+### Issue Data
+- All issues from the loaded SARIF file
+- Fingerprints (unique identifiers)
+- Locations, messages, severities
+- Code snippets
+
+### Progress State
+- Which issues are marked `fixed` (F)
+- Which issues are marked `skipped` (S)
+- Which issues are still `pending` (P)
+
+### Session Metadata
+- Loaded SARIF filename
+- Content hash for change detection
+- Timestamp of last load
+
+## Persistence Behavior
+
+### Context Compaction
+
+When your AI agent's context compacts (truncates old messages), your progress is safe:
+
+1. Agent context compacts
+2. Agent calls `sheriff load target="same.sarif"`
+3. Sheriff detects same content hash
+4. Previous progress is restored
+5. Agent continues where it left off
+
+### Session Restart
+
+When you restart Claude Code or your MCP client:
+
+1. Sheriff server restarts
+2. Agent calls `sheriff load target="same.sarif"`
+3. Previous progress is restored
+4. Agent continues from last checkpoint
+
+### Agent Switch
+
+When switching between AI agents:
+
+1. First agent makes progress
+2. Session ends
+3. Second agent starts, calls `sheriff load`
+4. First agent's progress is preserved
+5. Second agent continues
+
+## Content Hash Detection
+
+Sheriff uses content hashing to detect SARIF changes:
+
+```
+qodana.sarif.json → SHA-256 hash → matches stored hash?
+  ↓                                    ↓
+Same content                      Different content
+  ↓                                    ↓
+Restore progress                  Clear old, start fresh
+```
+
+<Aside type="caution">
+If you re-run static analysis, fingerprints may change even for the same issues. This triggers a fresh session. Complete a full fix pass before rescanning.
+</Aside>
+
+## SARIF Reload
+
+When a new SARIF file is loaded (different content):
+
+1. Prior progress counts are captured for the response
+2. Issues and progress tables are cleared
+3. New issues are loaded from the updated SARIF
+
+## Database Schema
+
+Sheriff uses H2 embedded database with three tables:
+
+### Meta Table
+Key-value store for session metadata (SARIF path, content hash, timestamps).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `key` | VARCHAR(255) | Primary key |
+| `value` | VARCHAR(4096) | Metadata value |
+
+### Issues Table
+| Column | Type | Description |
+|--------|------|-------------|
+| `fp` | VARCHAR(64) | Primary key (fingerprint) |
+| `rule` | VARCHAR(255) NOT NULL | Rule that flagged issue |
+| `file` | VARCHAR(4096) NOT NULL | Source file path |
+| `line` | INT | Line number |
+| `col` | INT | Column number |
+| `msg` | TEXT | Issue description |
+| `sev` | CHAR(1) | Severity: `H`/`M`/`L` |
+| `snip` | TEXT | Code snippet |
+| `ctx` | TEXT | Context lines |
+
+### Progress Table
+| Column | Type | Description |
+|--------|------|-------------|
+| `fp` | VARCHAR(64) | Primary key (fingerprint) |
+| `status` | CHAR(1) NOT NULL | `F` (fixed), `S` (skipped) |
+| `ts` | TIMESTAMP | When the status was set |
+| `note` | TEXT | Optional note |
+
+## Troubleshooting
+
+### Corrupted State
+
+If state becomes corrupted:
+
+```bash
+rm -rf .sheriff/
+```
+
+Then reload the SARIF file to start fresh.
+
+### Wrong Progress Restored
+
+If wrong progress is restored (from old session):
+
+1. Check that SARIF content hasn't changed
+2. If it has, the old progress won't apply
+3. Delete `.sheriff/` and reload
+
+### Database Locked
+
+If you see "database locked" errors:
+
+1. Check for other Sheriff processes
+2. Kill any zombie Java processes holding the file lock
+3. If needed, delete `.sheriff/` and reload

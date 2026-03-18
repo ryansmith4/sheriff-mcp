@@ -1,0 +1,59 @@
+version: 2
+updates:
+  # Gradle dependencies
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "java"
+    commit-message:
+      prefix: "deps"
+    groups:
+      # Group minor/patch updates to reduce PR noise
+      gradle-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions:
+        patterns:
+          - "*"
+
+  # npm for docs site
+  - package-ecosystem: "npm"
+    directory: "/docs"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "documentation"
+    commit-message:
+      prefix: "docs"
+    groups:
+      docs-deps:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"

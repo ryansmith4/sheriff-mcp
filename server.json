@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.ryansmith4/sheriff-mcp",
+  "description": "AI-powered static analysis issue fixer - MCP server for SARIF reports. Loads SARIF files from tools like Qodana, Semgrep, ESLint, and CodeQL. Manages issue workflow with file-based batching, tracks fix progress, and persists state across sessions using an embedded H2 database.",
+  "title": "Sheriff",
+  "websiteUrl": "https://github.com/ryansmith4/sheriff-mcp#installation",
+  "repository": {
+    "url": "https://github.com/ryansmith4/sheriff-mcp",
+    "source": "github"
+  },
+  "version": "1.0.0",
+  "packages": [
+    {
+      "registryType": "oci",
+      "identifier": "ghcr.io/ryansmith4/sheriff-mcp:1.0.0",
+      "version": "1.0.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

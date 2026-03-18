@@ -1,0 +1,88 @@
+---
+title: "reopen"
+description: Undo fixed/skipped marks
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The `reopen` action undoes fixed or skipped marks, returning issues to pending status.
+
+## Request
+
+```json
+{
+  "action": "reopen",
+  "fps": ["88d32cab35478753"]
+}
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `fps` | array | Yes | Array of fingerprints to reopen |
+
+## Response
+
+```json
+{
+  "reopened": 1,
+  "prog": {"total": 136, "fixed": 114, "skip": 2, "rem": 20}
+}
+```
+
+### Response Fields
+
+| Field | Description |
+|-------|-------------|
+| `reopened` | Number of issues reopened |
+| `prog` | Updated progress summary |
+
+## Use Cases
+
+### Undo Accidental Mark
+Marked the wrong issue? Reopen it:
+```json
+{"action": "reopen", "fps": ["88d32cab"]}
+```
+
+### Revisit Skipped Issues
+Previously skipped as false positive, but now want to fix:
+```json
+{"action": "reopen", "fps": ["xyz12345", "abc67890"]}
+```
+
+### Re-examine After Discussion
+User decided an issue needs fixing after all:
+```json
+{"action": "reopen", "fps": ["88d32cab"]}
+// Issue returns to pending, will appear in next `next` call
+```
+
+<Aside type="tip">
+You can reopen issues that were marked as either `fixed` or `skip`. They both return to `pending` status.
+</Aside>
+
+## Example
+
+```
+Agent: sheriff done fps=["88d32cab"] status="skip"
+       → Marked as skipped (thought it was false positive)
+
+User: "Actually, that's a real bug. Can you fix it?"
+
+Agent: sheriff reopen fps=["88d32cab"]
+       → Issue is now pending again
+
+Agent: sheriff next
+       → Issue appears in next batch
+```
+
+## Error Cases
+
+| Error Code | Cause | Solution |
+|------------|-------|----------|
+| `SARIF_NOT_LOADED` | No SARIF file has been loaded | Call `load` first |
+| `INVALID_FINGERPRINT` | Fingerprints are missing or none exist | Provide valid fingerprints from `next` response |
+| `ALREADY_OPEN` | None of the provided issues are marked | Issues are already in pending state |
+| `DB_ERROR` | Database error occurred | Check `.sheriff/` directory permissions |

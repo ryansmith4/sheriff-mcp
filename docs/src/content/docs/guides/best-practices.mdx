@@ -1,0 +1,162 @@
+---
+title: Best Practices
+description: Tips for efficient static analysis fixing with Sheriff
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+## Workflow Best Practices
+
+### Complete Full Passes Before Rescanning
+
+Running a new static analysis scan mid-fix generates new fingerprints and resets your progress.
+
+<Aside type="caution">
+If you rescan while fixing issues, all your progress tracking resets. Complete a full fix pass first, then rescan to catch any new issues.
+</Aside>
+
+**Recommended workflow:**
+<Steps>
+1. Run static analysis once
+2. Load SARIF into Sheriff
+3. Fix all issues (or all issues you plan to fix)
+4. Rescan to verify fixes and catch new issues
+5. Repeat if needed
+</Steps>
+
+### Fix All Issues in a File Before Moving On
+
+Sheriff groups issues by file for a reason. Jumping between files wastes context and increases the chance of missing issues.
+
+```
+# Good: Complete one file
+next → 3 issues in Service.java
+[fix all 3]
+done fps=[...] → mark all 3
+
+# Bad: Partial fixes
+next → 3 issues in Service.java
+[fix 1]
+done fps=[1] → mark 1
+next → returns remaining 2 in Service.java (wastes a tool call)
+```
+
+### Use Scope Filtering Strategically
+
+Filter by rule type for batch efficiency:
+
+```json
+// Fix all unused imports first (mechanical, fast)
+{"action": "next", "scope": {"rule": "unused*"}}
+
+// Then tackle complex issues
+{"action": "next", "scope": {"rule": "DataFlowIssue"}}
+```
+
+Filter by severity for priority:
+```json
+// Critical bugs first
+{"action": "next", "scope": {"severity": "High"}}
+```
+
+## Finding Issues After Edits
+
+### Match by Snippet, Not Line Number
+
+After editing code, line numbers shift. Use the `snip` field to locate issues:
+
+```json
+{
+  "loc": "45:12",  // May be wrong after edits
+  "snip": "if (value != null) {"  // Search for this
+}
+```
+
+**Agent approach:**
+1. Note the `snip` content
+2. Search the file for that snippet
+3. The issue is at that location (regardless of line number)
+
+### Work Top-to-Bottom
+
+When fixing multiple issues in a file, work from top to bottom. This minimizes line number drift for remaining issues.
+
+## Handling False Positives
+
+### Use `skip` Status
+
+Don't leave false positives unmarked—they'll keep appearing:
+
+```json
+{"action": "done", "fps": ["fp123"], "status": "skip"}
+```
+
+### Document Skip Reasons
+
+When an agent skips issues, it should explain why:
+> "Marking as false positive: The static analyzer doesn't see that `validateInput()` guarantees non-null here."
+
+<Aside type="tip">
+Skipped issues are recorded for review. You can always `reopen` them later if you change your mind.
+</Aside>
+
+## Batch Size Recommendations
+
+Adjust the `limit` parameter based on issue complexity:
+
+| Issue Type | Recommended Limit | Reason |
+|------------|-------------------|--------|
+| Unused imports | 20+ | Mechanical, fast |
+| Constant checks | 10 | Need context |
+| Null pointer issues | 3-5 | Require careful analysis |
+| Security issues | 1-3 | Need thorough review |
+
+```json
+// Quick mechanical fixes
+{"action": "next", "scope": {"rule": "unused"}, "limit": 20}
+
+// Complex analysis needed
+{"action": "next", "scope": {"rule": "SQL_INJECTION"}, "limit": 2}
+```
+
+## Using Summary Effectively
+
+### Plan Before Starting
+
+```json
+{"action": "summary"}
+```
+
+Use the breakdown to:
+- Identify quick wins (high count, simple fixes)
+- Prioritize critical issues (high severity)
+- Estimate effort
+
+### Report Progress to Users
+
+```json
+{"action": "progress"}
+```
+
+"We've fixed 85 of 136 issues (63%). 12 null pointer issues and 39 formatting issues remain."
+
+## Session Management
+
+### State Persists Automatically
+
+Sheriff stores state in `.sheriff/` directory. No need to save manually.
+
+**State survives:**
+- Context compaction
+- Session restart
+- Agent switches
+
+### Clear State When Needed
+
+If you need to start fresh, delete the `.sheriff/` directory:
+
+```bash
+rm -rf .sheriff/
+```
+
+Then reload the SARIF file.

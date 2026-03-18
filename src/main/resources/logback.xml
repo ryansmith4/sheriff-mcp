@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="LOG_DIR" value=".sheriff" />
+    <property name="LOG_LEVEL" value="${LOG_LEVEL:-INFO}" />
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/sheriff.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/sheriff.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>3</maxHistory>
+            <totalSizeCap>50MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="${LOG_LEVEL}">
+        <appender-ref ref="FILE" />
+    </root>
+
+    <!-- Reduce noise from libraries -->
+    <logger name="io.modelcontextprotocol" level="INFO" />
+    <logger name="com.zaxxer.hikari" level="WARN" />
+    <logger name="org.h2" level="WARN" />
+</configuration>

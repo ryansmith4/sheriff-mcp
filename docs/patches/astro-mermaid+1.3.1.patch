@@ -1,0 +1,15 @@
+diff --git a/node_modules/astro-mermaid/astro-mermaid-integration.js b/node_modules/astro-mermaid/astro-mermaid-integration.js
+index dc42e9e..9abbe93 100644
+--- a/node_modules/astro-mermaid/astro-mermaid-integration.js
++++ b/node_modules/astro-mermaid/astro-mermaid-integration.js
+@@ -369,6 +369,10 @@ if (${autoTheme}) {
+         // Reset processed state and re-render
+         document.querySelectorAll('pre.mermaid[data-processed]').forEach(diagram => {
+           diagram.removeAttribute('data-processed');
++          const original = diagram.getAttribute('data-diagram');
++          if (original) {
++            diagram.textContent = original;
++          }
+         });
+         initMermaid();
+       }

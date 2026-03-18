@@ -1,0 +1,122 @@
+---
+title: "done"
+description: Mark issues as fixed or skipped
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The `done` action marks issues as fixed or skipped. This updates Sheriff's database and advances your progress.
+
+## Request
+
+```json
+{
+  "action": "done",
+  "fps": ["88d32cab35478753", "ab1c2d3e12345678"],
+  "status": "fixed"
+}
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `fps` | array | Yes | Array of fingerprints to mark |
+| `status` | string | Yes | Either `"fixed"` or `"skip"` (aliases: `"fix"`/`"f"`, `"skipped"`/`"s"`) |
+
+## Response
+
+```json
+{
+  "marked": 2,
+  "prog": {"total": 136, "fixed": 115, "skip": 2, "rem": 19}
+}
+```
+
+### Response Fields
+
+| Field | Description |
+|-------|-------------|
+| `marked` | Number of issues marked |
+| `prog` | Updated progress summary (`total`, `fixed`, `skip`, `rem`) |
+
+## Status Options
+
+### `fixed`
+Use when you've resolved the issue in the code:
+```json
+{"action": "done", "fps": ["88d32cab"], "status": "fixed"}
+```
+
+### `skip`
+Use for false positives or issues you choose not to fix:
+```json
+{"action": "done", "fps": ["ab1c2d3e"], "status": "skip"}
+```
+
+<Aside type="tip">
+Marking false positives as `skip` prevents them from appearing in future `next` calls while keeping them recorded for review.
+</Aside>
+
+## Examples
+
+### Mark Single Issue Fixed
+```json
+{
+  "action": "done",
+  "fps": ["88d32cab35478753"],
+  "status": "fixed"
+}
+```
+
+### Mark Multiple Issues Fixed
+```json
+{
+  "action": "done",
+  "fps": ["88d32cab", "ab1c2d3e", "f9e8d7c6"],
+  "status": "fixed"
+}
+```
+
+### Skip False Positive
+```json
+{
+  "action": "done",
+  "fps": ["xyz12345"],
+  "status": "skip"
+}
+```
+
+## Best Practices
+
+### Fix All, Then Mark All
+Fix all issues in a file before calling `done`:
+1. `next` → Get 3 issues in `Service.java`
+2. Edit `Service.java` to fix all 3
+3. `done` with all 3 fingerprints
+
+### Use Full Fingerprints
+Always use the full fingerprint string returned by the `next` action. Sheriff performs exact matching on fingerprints:
+```json
+{"fps": ["88d32cab35478753"]}
+```
+
+<Aside type="caution">
+If you mark an issue as `fixed` but the code still has the problem, the next static analysis scan will recreate the issue with a new fingerprint.
+</Aside>
+
+## Error Cases
+
+| Error Code | Cause | Solution |
+|------------|-------|----------|
+| `SARIF_NOT_LOADED` | No SARIF file has been loaded | Call `load` first |
+| `INVALID_STATUS` | Status is not `fixed` or `skip` | Use `"fixed"` or `"skip"` |
+| `INVALID_FINGERPRINT` | Fingerprints are missing or none exist | Provide valid fingerprints from `next` response |
+| `DB_ERROR` | Database error occurred | Check `.sheriff/` directory permissions |
+
+## Undoing Marks
+
+Made a mistake? Use the [reopen](/sheriff-mcp/tools/reopen/) action to undo:
+```json
+{"action": "reopen", "fps": ["88d32cab35478753"]}
+```

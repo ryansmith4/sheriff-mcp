@@ -1,0 +1,133 @@
+---
+title: "export"
+description: Export remaining issues to a file
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The `export` action writes remaining issues to a file for external use or handoff.
+
+## Request
+
+```json
+{
+  "action": "export",
+  "format": "json",
+  "path": "remaining-issues.json"
+}
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `format` | string | No | Output format: `"json"` or `"list"` (default: `"json"`) |
+| `path` | string | No | Output file path (default: `sheriff-export-{yyyyMMdd-HHmmss}.json`) |
+| `scope` | object | No | Filter which issues to export |
+
+## Response
+
+```json
+{
+  "path": "/home/user/project/remaining-issues.json",
+  "format": "json",
+  "count": 19
+}
+```
+
+### Response Fields
+
+| Field | Description |
+|-------|-------------|
+| `path` | Path where file was written |
+| `format` | Format used |
+| `count` | Number of issues exported |
+| `scope` | Applied scope filter (present when scope was specified) |
+
+## Format Options
+
+### JSON Format
+Full structured data for programmatic use:
+```json
+{"action": "export", "format": "json", "path": "issues.json"}
+```
+
+Output file:
+```json
+{
+  "source": "qodana.sarif.json",
+  "exportedAt": "2026-03-01T10:30:00",
+  "count": 19,
+  "issues": [
+    {
+      "fingerprint": "88d32cab35478753",
+      "rule": "ConstantValue",
+      "file": "Service.java",
+      "line": 45,
+      "column": 12,
+      "message": "Condition is always true",
+      "severity": "High",
+      "snippet": "if (value != null) {"
+    }
+  ]
+}
+```
+
+### List Format
+Simple text list for human review:
+```json
+{"action": "export", "format": "list", "path": "issues.txt"}
+```
+
+Output file:
+```
+Service.java:45:12 [ConstantValue] Condition is always true
+Service.java:67:8 [unused] Private field never used
+Repository.java:23:5 [DataFlowIssue] Possible null pointer
+```
+
+## Use Cases
+
+### Handoff to Another Agent
+Export remaining issues for a different agent or session:
+```json
+{"action": "export", "format": "json", "path": "handoff.json"}
+```
+
+### Create Review List
+Export for human review before fixing:
+```json
+{"action": "export", "format": "list", "path": "review.txt"}
+```
+
+### Export Specific Category
+Export only high-severity issues:
+```json
+{
+  "action": "export",
+  "format": "json",
+  "path": "critical.json",
+  "scope": {"severity": "High"}
+}
+```
+
+<Aside type="caution">
+The export path must be within allowed directories. Attempting to write outside the project directory will fail.
+</Aside>
+
+## Error Cases
+
+| Error Code | Cause | Solution |
+|------------|-------|----------|
+| `SARIF_NOT_LOADED` | No SARIF file has been loaded | Call `load` first |
+| `NO_ISSUES` | No remaining issues to export | All issues are already fixed or skipped |
+| `INVALID_PATH` | Output path is invalid or outside working directory | Use a relative path within the project |
+| `INVALID_FORMAT` | Format is not `json` or `list` | Use `"json"` or `"list"` |
+| `DB_ERROR` | Database error occurred | Check `.sheriff/` directory permissions |
+| `IO_ERROR` | Failed to write export file | Check file system permissions |
+
+## Security
+
+Sheriff validates the export path to prevent directory traversal attacks:
+- Paths with `..` are rejected
+- All absolute paths are rejected; only relative paths within the working directory are allowed

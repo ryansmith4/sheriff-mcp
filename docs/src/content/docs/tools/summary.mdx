@@ -1,0 +1,125 @@
+---
+title: "summary"
+description: Get breakdown by rule, severity, and file
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The `summary` action provides a detailed breakdown of issues to help prioritize your work.
+
+## Request
+
+```json
+{
+  "action": "summary"
+}
+```
+
+### Parameters
+
+This action takes no parameters.
+
+## Response
+
+```json
+{
+  "total": 136,
+  "fixed": 115,
+  "skip": 2,
+  "rem": 19,
+  "byRule": [
+    {"rule": "ConstantValue", "total": 22, "fixed": 19, "skip": 0, "rem": 3},
+    {"rule": "unused", "total": 15, "fixed": 0, "skip": 0, "rem": 15},
+    {"rule": "DataFlowIssue", "total": 12, "fixed": 12, "skip": 0, "rem": 0}
+  ],
+  "bySev": [
+    {"sev": "High", "total": 104, "fixed": 86, "skip": 0, "rem": 18},
+    {"sev": "Moderate", "total": 32, "fixed": 29, "skip": 2, "rem": 1}
+  ],
+  "byFile": [
+    {"file": "Service.java", "total": 8, "fixed": 6, "skip": 0, "rem": 2},
+    {"file": "Repository.java", "total": 5, "fixed": 0, "skip": 0, "rem": 5}
+  ]
+}
+```
+
+### Response Fields
+
+| Field | Description |
+|-------|-------------|
+| `total` | Total issues loaded |
+| `fixed` | Issues marked as fixed |
+| `skip` | Issues marked as skipped |
+| `rem` | Remaining (pending) issues |
+| `byRule` | Array of breakdowns by rule ID |
+| `bySev` | Array of breakdowns by severity |
+| `byFile` | Array of breakdowns by file (top 20 by remaining count) |
+
+Each breakdown item contains:
+- `rule`/`sev`/`file`: The category identifier
+- `total`: Total issues in that category
+- `fixed`: Issues marked as fixed
+- `skip`: Issues marked as skipped
+- `rem`: Remaining (unfixed) issues
+
+## Use Cases
+
+### Planning Your Approach
+Before diving in, see what you're dealing with:
+```json
+{"action": "summary"}
+```
+
+Then decide:
+- Start with highest-count rules for quick wins
+- Start with High severity for critical issues
+- Focus on specific files the user cares about
+
+### Finding Quick Wins
+Look for rules with high counts but simple fixes:
+```json
+{
+  "byRule": [
+    {"rule": "unused", "total": 45, "fixed": 0, "skip": 0, "rem": 45},
+    {"rule": "ConstantValue", "total": 12, "fixed": 0, "skip": 0, "rem": 12}
+  ]
+}
+```
+
+### Checking What's Left
+After fixing, see what categories still need work:
+```json
+{
+  "byRule": [
+    {"rule": "unused", "total": 45, "fixed": 45, "skip": 0, "rem": 0},
+    {"rule": "DataFlowIssue", "total": 12, "fixed": 4, "skip": 0, "rem": 8}
+  ]
+}
+```
+
+<Aside type="tip">
+Use `summary` before starting to discuss priorities with the user. "There are 45 unused imports and 12 null pointer issues. Should we focus on critical bugs first?"
+</Aside>
+
+## Example Session
+
+```
+Agent: sheriff summary
+       → Shows 45 unused, 22 ConstantValue, 12 DataFlowIssue
+
+Agent: "I see 45 unused imports (quick fixes), 22 constant value
+        checks, and 12 potential null pointer issues. The null
+        pointer issues are highest severity. Where should I start?"
+
+User: "Start with the null pointer issues"
+
+Agent: sheriff next scope={rule: "DataFlowIssue"}
+       → Gets first batch of null pointer issues
+```
+
+## Error Cases
+
+| Error Code | Cause | Solution |
+|------------|-------|----------|
+| `SARIF_NOT_LOADED` | No SARIF file has been loaded | Call `load` first |
+| `DB_ERROR` | Database error occurred | Check `.sheriff/` directory permissions |

@@ -1,0 +1,23 @@
+{
+  "name": "sheriff-mcp-docs",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "postinstall": "patch-package",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.34.0",
+    "astro": "^5.0.0",
+    "astro-mermaid": "^1.3.1",
+    "mermaid": "^11.12.2",
+    "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "patch-package": "^8.0.1"
+  }
+}

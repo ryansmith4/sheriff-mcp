@@ -1,0 +1,69 @@
+---
+title: Getting Started
+description: Overview of Sheriff and how to get started
+---
+
+import { LinkCard, CardGrid, Aside } from '@astrojs/starlight/components';
+
+Sheriff is an MCP server that helps AI agents efficiently fix static analysis issues from SARIF reports.
+
+## Why Sheriff?
+
+When AI agents work with large static analysis reports, they face several challenges:
+
+- **Context overload** - Hundreds of issues overwhelm the context window
+- **Lost progress** - Work disappears on context compaction or session restart
+- **Inefficient navigation** - Jumping between files repeatedly wastes tokens
+
+Sheriff solves these problems by providing:
+
+- **Intelligent batching** - Issues grouped by file for efficient fixing
+- **Persistent progress** - State survives compaction and restarts
+- **Scope filtering** - Focus on specific rules, severities, or file patterns
+- **Compact responses** - Minimal context usage with abbreviated field names
+
+## Quick Start
+
+<CardGrid>
+  <LinkCard
+    title="1. Installation"
+    description="Download the JAR or use Docker"
+    href="/sheriff-mcp/getting-started/installation/"
+  />
+  <LinkCard
+    title="2. Agent Setup"
+    description="Configure your MCP client to use Sheriff"
+    href="/sheriff-mcp/getting-started/agent-setup/"
+  />
+</CardGrid>
+
+## Basic Workflow
+
+Once installed and configured, the workflow is:
+
+```
+1. Run static analysis     →  qodana scan
+2. Load into Sheriff       →  sheriff load target="results.sarif"
+3. Get next file's issues  →  sheriff next
+4. Fix all issues in file  →  [edit the code]
+5. Mark as done            →  sheriff done fps=[...] status="fixed"
+6. Repeat 3-5              →  until remaining = 0
+```
+
+## Supported Tools
+
+Sheriff works with any static analysis tool that produces SARIF output:
+
+- **Qodana** - Java, Kotlin, JavaScript, Python
+- **Semgrep** - Multi-language
+- **ESLint** - JavaScript/TypeScript
+- **CodeQL** - Multi-language
+- **SonarQube** - Multi-language
+- **SpotBugs** - Java
+- **Bandit** - Python
+- **Checkov** - Infrastructure as Code
+- **Trivy** - Containers and IaC
+
+<Aside type="tip">
+See the [Tool Reference](/sheriff-mcp/tools/) for detailed documentation on all Sheriff actions.
+</Aside>

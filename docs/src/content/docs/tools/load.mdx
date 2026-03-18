@@ -1,0 +1,103 @@
+---
+title: "load"
+description: Load a SARIF file and get overview statistics
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The `load` action parses a SARIF file and stores issues in Sheriff's database. This is typically the first action in any session.
+
+## Request
+
+```json
+{
+  "action": "load",
+  "target": "path/to/results.sarif"
+}
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `target` | string | Yes | Path to a SARIF file or directory containing SARIF files (directories are scanned up to 2 levels deep) |
+
+## Response
+
+```json
+{
+  "file": "qodana.sarif.json",
+  "total": 136,
+  "sev": {"H": 104, "M": 32},
+  "rules": {"ConstantValue": 22, "unused": 15, "...": "..."},
+  "files": 23,
+  "prior": {"fixed": 10, "skip": 2}
+}
+```
+
+### Response Fields
+
+| Field | Description |
+|-------|-------------|
+| `file` | SARIF file path, or target directory path when loading multiple files |
+| `total` | Total number of issues |
+| `sev` | Breakdown by severity (H=High, M=Moderate, L=Low) |
+| `rules` | Count per rule ID (top 10 by count) |
+| `files` | Number of unique files with issues |
+| `prior` | Previously marked issues (from prior sessions) |
+
+## Behavior
+
+### Fresh Load
+When loading a new SARIF file (different content hash):
+- All issues are parsed and stored
+- Prior progress counts are captured for the response, then the database is reset
+- New session starts with all issues in "pending" state
+
+### Reload Same File
+When loading the same SARIF file again:
+- Existing progress is preserved
+- `prior` shows how many issues were already marked
+- Useful after session restart or context compaction
+
+<Aside type="tip">
+Sheriff uses content hashing to detect SARIF changes. If you re-run analysis mid-fix, fingerprints may change and you'll start fresh. Complete a full pass before rescanning.
+</Aside>
+
+## Examples
+
+### Load Qodana Results
+```json
+{"action": "load", "target": "build/qodana/qodana.sarif.json"}
+```
+
+### Load with Absolute Path
+```json
+{"action": "load", "target": "/home/user/project/results.sarif"}
+```
+
+### Response Example
+```json
+{
+  "file": "qodana.sarif.json",
+  "total": 136,
+  "sev": {"H": 104, "M": 32},
+  "rules": {
+    "ConstantValue": 22,
+    "unused": 15,
+    "DataFlowIssue": 12,
+    "NullableProblems": 8
+  },
+  "files": 23,
+  "prior": {"fixed": 0, "skip": 0}
+}
+```
+
+## Error Cases
+
+| Error Code | Cause | Solution |
+|------------|-------|----------|
+| `INVALID_TARGET` | Target path is null, empty, or blank | Provide a valid file or directory path |
+| `SARIF_NOT_FOUND` | No SARIF files found at path | Check the file path exists and contains `.sarif` or `.sarif.json` files |
+| `SARIF_PARSE_ERROR` | File isn't valid SARIF JSON | Verify your static analysis tool output |
+| `DB_ERROR` | Database error occurred | Check `.sheriff/` directory permissions |

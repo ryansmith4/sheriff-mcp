@@ -1,0 +1,45 @@
+# Gradle
+.gradle/
+**/build
+**/bin
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Sheriff runtime
+.sheriff/
+
+# CodeAtlas runtime
+.codeatlas/
+
+# Docs build output and dependencies
+docs/node_modules/
+**/dist
+
+# Claude Code
+memory/
+.claude/settings.local.json
+
+# Environment
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+NUL
+
+# Logs
+*.log
+
+# Sheriff export files
+export.json
+export.txt
+sheriff-export-*.json
+sheriff-export-*.txt

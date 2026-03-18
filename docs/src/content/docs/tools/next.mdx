@@ -1,0 +1,161 @@
+---
+title: "next"
+description: Get the next batch of issues to fix (grouped by file)
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The `next` action retrieves the next batch of issues to work on. Issues are grouped by file, so you can fix all issues in one file before moving to the next.
+
+## Request
+
+```json
+{
+  "action": "next",
+  "scope": {"rule": "ConstantValue"},
+  "limit": 5
+}
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `scope` | object | No | Filter issues (see [Scope Filtering](/sheriff-mcp/tools/#scope-filtering)) |
+| `limit` | integer | No | Maximum issues to return (default: 25) |
+| `fmt` | string | No | Output format: `"default"` or `"checklist"` |
+
+## Response
+
+```json
+{
+  "file": "src/main/java/Service.java",
+  "issues": [
+    {
+      "fp": "88d32cab35478753",
+      "rule": "ConstantValue",
+      "loc": "45:12",
+      "msg": "Condition 'value != null' is always true",
+      "sev": "H",
+      "snip": "if (value != null) {"
+    },
+    {
+      "fp": "ab1c2d3e12345678",
+      "rule": "ConstantValue",
+      "loc": "67:8",
+      "msg": "Condition 'list.isEmpty()' is always false",
+      "sev": "H",
+      "snip": "if (list.isEmpty()) {"
+    }
+  ],
+  "prog": {"rem": 19, "remF": 7, "fixed": 10, "skip": 2}
+}
+```
+
+### Response Fields
+
+| Field | Description |
+|-------|-------------|
+| `file` | File path containing these issues |
+| `issues` | Array of issue objects |
+| `prog` | Progress summary |
+| `checklist` | Array of checklist items (present when `fmt` is `"checklist"`) |
+
+### Checklist Item Fields
+
+| Field | Description |
+|-------|-------------|
+| `task` | Human-readable task description |
+| `fp` | Fingerprint of the issue |
+
+### Issue Object Fields
+
+| Field | Description |
+|-------|-------------|
+| `fp` | Fingerprint - unique ID for this issue |
+| `rule` | Rule ID from the static analysis tool |
+| `loc` | Location as `line:column` |
+| `msg` | Issue message/description |
+| `sev` | Severity: `H` (High), `M` (Moderate), `L` (Low) |
+| `snip` | Code snippet showing the issue |
+| `ctx` | Context lines surrounding the issue (when available) |
+
+### Progress Fields
+
+| Field | Description |
+|-------|-------------|
+| `rem` | Remaining issues (in current scope) |
+| `remF` | Remaining files with issues |
+| `fixed` | Issues marked as fixed |
+| `skip` | Issues marked as skipped |
+
+## Behavior
+
+### File Grouping
+Issues are always returned grouped by file. If there are 5 issues in `Service.java` and you call `next` without specifying a limit, you'll get all 5 (since 5 is under the default limit of 25).
+
+### Limit Behavior
+The `limit` parameter caps issues returned, but stays within one file:
+- If `Service.java` has 10 issues and `limit=5`, you get 5 issues from `Service.java`
+- Mark those 5 as `done`, then call `next` again to get the remaining 5 from the same file
+- Without marking issues as done, `next` returns the same batch
+
+### Scope Filtering
+Apply filters to focus on specific issues:
+```json
+{"action": "next", "scope": {"rule": "ConstantValue", "severity": "High"}}
+```
+
+<Aside type="tip">
+Use smaller limits for complex security issues that require careful review. Use larger limits for mechanical fixes like formatting or unused imports.
+</Aside>
+
+## Examples
+
+### Get Next File's Issues
+```json
+{"action": "next"}
+```
+
+### Filter by Rule
+```json
+{"action": "next", "scope": {"rule": "ConstantValue"}}
+```
+
+### Limit Results
+```json
+{"action": "next", "limit": 3}
+```
+
+### Combined Scope and Limit
+```json
+{
+  "action": "next",
+  "scope": {"severity": "High", "file": "src/**/*.java"},
+  "limit": 5
+}
+```
+
+## When All Done
+
+When no more issues match your scope:
+
+```json
+{
+  "issues": [],
+  "prog": {"rem": 0, "remF": 0, "fixed": 45, "skip": 3}
+}
+```
+
+<Aside type="caution">
+After fixing issues, line numbers may shift. Use the `snip` (code snippet) to locate issues rather than relying on `loc` line numbers.
+</Aside>
+
+## Error Cases
+
+| Error Code | Cause | Solution |
+|------------|-------|----------|
+| `SARIF_NOT_LOADED` | No SARIF file has been loaded | Call `load` first |
+| `INVALID_SCOPE` | Invalid scope filter | Check severity is `High`, `Moderate`, or `Low` |
+| `INVALID_LIMIT` | Limit is not a positive integer | Provide a positive integer |
+| `DB_ERROR` | Database error occurred | Check `.sheriff/` directory permissions |

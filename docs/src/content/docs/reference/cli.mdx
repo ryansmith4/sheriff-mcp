@@ -1,0 +1,105 @@
+---
+title: CLI Reference
+description: Sheriff command-line interface reference
+---
+
+Sheriff provides a command-line interface for starting the MCP server and checking status.
+
+## Commands
+
+### `start`
+
+Start the MCP server using stdio transport:
+
+```bash
+java -jar sheriff-mcp-X.Y.Z-all.jar start
+```
+
+The server runs in the foreground and communicates via stdin/stdout (MCP stdio transport).
+
+### `status`
+
+Show current session status:
+
+```bash
+sheriff status
+```
+
+Output (when a SARIF file is loaded):
+```
+SARIF: qodana.sarif.json
+Loaded: 2026-03-01T10:30:00
+Issues: 136 total, 115 fixed, 2 skipped, 19 remaining
+```
+
+Output (when no SARIF file is loaded):
+```
+No SARIF file loaded
+```
+
+### `--version`
+
+Show version information:
+
+```bash
+sheriff --version
+# Sheriff X.Y.Z
+```
+
+### `--help`
+
+Show help:
+
+```bash
+sheriff --help
+```
+
+Output:
+```
+Usage: sheriff [COMMAND]
+AI work queue manager for static analysis issues
+
+Commands:
+  start   Start the MCP server
+  status  Show Sheriff status
+
+Options:
+  -h, --help      Show this help message
+  -V, --version   Print version information
+```
+
+## Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | Success |
+| 1 | General error |
+| 2 | Invalid arguments |
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `LOG_LEVEL` | Logging level | `INFO` |
+
+Log files are rotated automatically: 10MB max per file, 3 days retention, 50MB total cap.
+
+## State Directory
+
+Sheriff stores its state in `.sheriff/` (relative to working directory):
+
+```
+.sheriff/
+├── sheriff.mv.db    # H2 database with issues and progress
+└── sheriff.log      # Application logs
+```
+
+### Clearing State
+
+To reset Sheriff and start fresh:
+
+```bash
+rm -rf .sheriff/
+```
+
+Then reload your SARIF file.

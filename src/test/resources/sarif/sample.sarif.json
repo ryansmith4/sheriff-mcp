@@ -1,0 +1,142 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "TestAnalyzer",
+          "version": "1.0.0",
+          "rules": [
+            {
+              "id": "ConstantValue",
+              "name": "Constant condition",
+              "shortDescription": {
+                "text": "Condition is always true or false"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "UnusedVariable",
+              "name": "Unused variable",
+              "shortDescription": {
+                "text": "Variable is declared but never used"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "ConstantValue",
+          "level": "warning",
+          "message": {
+            "text": "Condition 'value != null' is always true"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/main/java/com/example/Service.java"
+                },
+                "region": {
+                  "startLine": 45,
+                  "startColumn": 12,
+                  "snippet": {
+                    "text": "if (value != null) {"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "0": "abc123def456"
+          }
+        },
+        {
+          "ruleId": "ConstantValue",
+          "level": "warning",
+          "message": {
+            "text": "Condition 'result != null' is always true"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/main/java/com/example/Service.java"
+                },
+                "region": {
+                  "startLine": 52,
+                  "startColumn": 8,
+                  "snippet": {
+                    "text": "if (result != null) {"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "0": "def789ghi012"
+          }
+        },
+        {
+          "ruleId": "UnusedVariable",
+          "level": "note",
+          "message": {
+            "text": "Variable 'temp' is never used"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/main/java/com/example/Repository.java"
+                },
+                "region": {
+                  "startLine": 23,
+                  "startColumn": 4,
+                  "snippet": {
+                    "text": "String temp = getValue();"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "0": "jkl345mno678"
+          }
+        },
+        {
+          "ruleId": "ConstantValue",
+          "level": "error",
+          "message": {
+            "text": "Condition 'x > 0' is always false"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/main/java/com/example/Utils.java"
+                },
+                "region": {
+                  "startLine": 100,
+                  "startColumn": 16,
+                  "snippet": {
+                    "text": "while (x > 0) {"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "0": "pqr901stu234"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+# Default owners for everything in the repo
+* @ryansmith4
+
+# Documentation
+/docs/ @ryansmith4
+*.md @ryansmith4
+
+# CI/CD
+/.github/ @ryansmith4
+
+# Core code
+/src/main/java/ @ryansmith4
+/src/test/java/ @ryansmith4

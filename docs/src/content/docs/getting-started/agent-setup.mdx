@@ -1,0 +1,117 @@
+---
+title: Agent Setup
+description: Configure AI agents to use Sheriff for static analysis fixes
+---
+
+import { Tabs, TabItem, Aside, Code } from '@astrojs/starlight/components';
+
+## Supported MCP Clients
+
+Sheriff works with any client that supports the [Model Context Protocol](https://modelcontextprotocol.io/):
+
+- **Claude Code** / **Claude Desktop** - Anthropic
+- **ChatGPT Desktop** - OpenAI (adopted MCP March 2025)
+- **Cursor** / **Windsurf** - AI-native IDEs
+- **Zed** - High-performance editor
+- **Continue** / **Cline** - VS Code extensions
+- **Cody** - Sourcegraph
+
+## Configure MCP Server
+
+Add Sheriff to your MCP client configuration.
+
+<Tabs>
+  <TabItem label="JAR">
+For **Claude Code**, add to your project's `.mcp.json` or run `claude mcp add sheriff`. For **Claude Desktop**, add to `claude_desktop_config.json` (`~/Library/Application Support/Claude/` on macOS or `%APPDATA%\Claude\` on Windows). For **Cursor**, **Windsurf**, and other clients, consult their documentation for the config file location.
+
+```json
+{
+  "mcpServers": {
+    "sheriff": {
+      "command": "java",
+      "args": ["-jar", "/path/to/sheriff-mcp-X.Y.Z-all.jar", "start"]
+    }
+  }
+}
+```
+  </TabItem>
+  <TabItem label="Docker">
+Mount your project directory so Sheriff can access SARIF files and persist state:
+
+```json
+{
+  "mcpServers": {
+    "sheriff": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "-v", ".:/data", "ghcr.io/ryansmith4/sheriff-mcp:latest"]
+    }
+  }
+}
+```
+  </TabItem>
+</Tabs>
+
+## Add Agent Instructions
+
+Add the following to your project's `CLAUDE.md`, `copilot-instructions.md`, or equivalent agent instructions file:
+
+```markdown
+## Static Analysis with Sheriff
+
+This project uses Sheriff for managing static analysis fixes.
+
+### Workflow
+
+1. Load SARIF: `sheriff load target="path/to/results.sarif"`
+2. Get issues: `sheriff next` (optionally with scope filter)
+3. Fix ALL issues in the returned file
+4. Mark done: `sheriff done fps=["fp1", "fp2"] status="fixed"`
+5. Repeat until `remaining = 0`
+
+### Important
+
+- Fix all issues in a file before calling `next` again
+- Use `status="skip"` for false positives
+- Use snippet matching (not line numbers) to locate issues after edits
+- Don't rescan until the full fix pass is complete
+```
+
+<Aside type="tip">
+Including these instructions ensures the agent follows the optimal workflow for efficiency.
+</Aside>
+
+## Example Prompts
+
+Here are effective prompts to give your AI agent:
+
+### Fix All Issues
+> Load the SARIF file at `build/qodana/qodana.sarif.json` and fix all issues, starting with High severity.
+
+### Fix Specific Rule
+> Load the SARIF and fix all "ConstantValue" issues. These are redundant null checks.
+
+### Review First
+> Load the SARIF and show me a summary. I want to skip "unused" warnings and focus on bugs.
+
+### Focus on Files
+> Load the SARIF and fix all issues in `src/main/java/com/example/service/**`.
+
+## Verifying Setup
+
+After configuration, test that Sheriff is working:
+
+1. Ask your agent: "What MCP tools do you have available?"
+2. Look for `sheriff` in the list of available tools
+3. Try: "Run `sheriff --help` to show available commands"
+
+<Aside type="caution">
+If Sheriff doesn't appear in the tool list, verify:
+- The command path is correct
+- Java 21+ is installed and in PATH
+- The MCP client has been restarted after config changes
+</Aside>
+
+## Next Steps
+
+- [Tool Reference](/sheriff-mcp/tools/) - Learn all Sheriff actions
+- [Best Practices](/sheriff-mcp/guides/best-practices/) - Tips for efficient fixing
