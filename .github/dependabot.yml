@@ -13,7 +13,11 @@ updates:
     commit-message:
       prefix: "deps"
     groups:
-      # Group minor/patch updates to reduce PR noise
+      testing:
+        patterns:
+          - "org.junit*"
+          - "org.assertj*"
+          - "ch.qos.logback*"
       gradle-minor:
         patterns:
           - "*"

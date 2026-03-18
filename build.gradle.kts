@@ -48,15 +48,17 @@ application {
     mainClass.set("com.guidedbyte.sheriff.SheriffApplication")
 }
 
-// Generate version.properties at build time
+// Generate version.properties at build time (configuration cache compatible)
 tasks.register("generateVersionProperties") {
     val outputDir = layout.buildDirectory.dir("generated/resources")
+    val projectVersion = provider { project.version.toString() }
     outputs.dir(outputDir)
+    inputs.property("version", projectVersion)
 
     doLast {
         val propsFile = outputDir.get().file("version.properties").asFile
         propsFile.parentFile.mkdirs()
-        propsFile.writeText("version=${project.version}\n")
+        propsFile.writeText("version=${projectVersion.get()}\n")
     }
 }
 
@@ -215,7 +217,9 @@ jreleaser {
 
     signing {
         active.set(org.jreleaser.model.Active.ALWAYS)
-        mode.set(org.jreleaser.model.Signing.Mode.COSIGN)
+        cosign {
+            active.set(org.jreleaser.model.Active.ALWAYS)
+        }
     }
 
     release {
