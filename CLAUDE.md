@@ -117,8 +117,9 @@ Use these prefixes for automatic changelog generation:
   - `cli/` - Picocli CLI commands
 - `.github/workflows/` - CI/CD pipelines
   - `ci.yml` - Build/test/format check on push to main and PRs
-  - `release.yml` - JAR release → Docker push → MCP Registry publish (on `v*` tags)
+  - `release.yml` - JAR release → Docker push → MCP Registry publish → README version update PR (on `v*` tags)
   - `docs.yml` - GitHub Pages deployment (on `v*` tags, docs changes, or manual)
+  - `dependabot-auto-merge.yml` - Auto-squash-merges non-major Dependabot PRs
 
 ## Key Design Decisions
 

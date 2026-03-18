@@ -22,6 +22,5 @@
 
     <!-- Reduce noise from libraries -->
     <logger name="io.modelcontextprotocol" level="INFO" />
-    <logger name="com.zaxxer.hikari" level="WARN" />
     <logger name="org.h2" level="WARN" />
 </configuration>

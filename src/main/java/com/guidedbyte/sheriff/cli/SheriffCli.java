@@ -16,13 +16,14 @@
 package com.guidedbyte.sheriff.cli;
 
 import java.io.InputStream;
-import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.guidedbyte.sheriff.ServiceFactory;
@@ -60,17 +61,23 @@ public class SheriffCli implements Callable<Integer> {
             mcpServer.shutdown();
         });
 
-        // Phase 2: Initialize services (DB connection, etc.) in background
+        // Phase 2: Initialize services (DB connection, etc.) in background.
+        // Uses a dedicated thread to avoid ForkJoinPool contention.
         AtomicReference<ServiceFactory> factoryRef = new AtomicReference<>();
-        CompletableFuture.runAsync(() -> {
-            try {
-                ServiceFactory factory = new ServiceFactory();
-                factoryRef.set(factory);
-                mcpServer.setTool(factory.getSheriffTool());
-            } catch (SQLException e) {
-                log.error("Failed to initialize services: {}", e.getMessage(), e);
-            }
-        });
+        ExecutorService initExecutor = Executors.newSingleThreadExecutor();
+        CompletableFuture.runAsync(
+                () -> {
+                    try {
+                        ServiceFactory factory = new ServiceFactory();
+                        factoryRef.set(factory);
+                        mcpServer.setTool(factory.getSheriffTool());
+                    } catch (Exception e) {
+                        log.error("Failed to initialize services: {}", e.getMessage(), e);
+                        mcpServer.setInitFailure(e);
+                    }
+                },
+                initExecutor);
+        initExecutor.shutdown();
 
         // Start the server (blocks until shutdown)
         mcpServer.start(eofStdin);
@@ -108,7 +115,7 @@ public class SheriffCli implements Callable<Integer> {
                         "Issues: %d total, %d fixed, %d skipped, %d remaining%n", total, fixed, skip, remaining);
             }
             return 0;
-        } catch (SQLException e) {
+        } catch (Exception e) {
             log.error("Status check failed: {}", e.getMessage(), e);
             System.err.println("Error: Status check failed. Check logs for details.");
             return 1;

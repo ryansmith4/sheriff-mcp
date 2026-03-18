@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.guidedbyte.sheriff.Version;
 import com.guidedbyte.sheriff.mcp.tools.SheriffTool;
@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  *
  * <p>Supports two-phase startup: the MCP transport starts listening on stdin immediately,
  * while heavy initialization (database, services) happens in the background. Tool calls
- * block until initialization completes.
+ * received before initialization completes return an immediate error (no blocking).
  */
 public class SheriffMcpServer {
 
@@ -53,13 +53,12 @@ public class SheriffMcpServer {
 
     private static final String SERVER_NAME = "sheriff";
     private static final String SERVER_VERSION = Version.get();
-    private static final long INIT_TIMEOUT_SECONDS = 30;
 
     private final ObjectMapper mapper;
     private final JacksonMcpJsonMapper jsonMapper;
     private final CompletableFuture<SheriffTool> toolFuture;
-    private volatile SheriffTool sheriffTool;
     private final CountDownLatch shutdownLatch = new CountDownLatch(1);
+    private final AtomicBoolean serverClosed = new AtomicBoolean(false);
 
     public SheriffMcpServer() {
         this.mapper = new ObjectMapper();
@@ -72,9 +71,17 @@ public class SheriffMcpServer {
      * Called from the background initialization thread.
      */
     public void setTool(SheriffTool tool) {
-        this.sheriffTool = tool;
         this.toolFuture.complete(tool);
         log.info("Sheriff tool wired to MCP server");
+    }
+
+    /**
+     * Signals that background initialization failed. Tool calls will return
+     * an immediate error instead of blocking.
+     */
+    public void setInitFailure(Exception cause) {
+        this.toolFuture.completeExceptionally(cause);
+        log.error("Sheriff tool initialization failed", cause);
     }
 
     /**
@@ -114,10 +121,12 @@ public class SheriffMcpServer {
 
         log.info("Sheriff MCP server ready");
 
-        // Register shutdown hook for clean server close
+        // Register shutdown hook for clean server close (guarded against double-close)
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("Shutting down Sheriff MCP server...");
-            server.close();
+            if (serverClosed.compareAndSet(false, true)) {
+                server.close();
+            }
             shutdownLatch.countDown();
         }));
 
@@ -126,21 +135,29 @@ public class SheriffMcpServer {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.info("Server interrupted");
+        } finally {
+            if (serverClosed.compareAndSet(false, true)) {
+                server.close();
+            }
         }
     }
 
     /**
-     * Handles tool calls. Waits for initialization if the tool hasn't been wired yet.
+     * Handles tool calls. Returns an immediate error if initialization hasn't completed
+     * (never blocks the MCP handler thread).
      */
     private CallToolResult handleToolCall(McpSyncServerExchange exchange, CallToolRequest request) {
         Map<String, Object> arguments = request.arguments();
         log.debug("Tool call with action: {}", arguments != null ? arguments.get("action") : "null");
 
         try {
-            SheriffTool tool = this.sheriffTool;
+            // Non-blocking check: return immediate error if not ready
+            SheriffTool tool = toolFuture.getNow(null);
             if (tool == null) {
-                log.info("Tool call received before initialization complete, waiting...");
-                tool = toolFuture.get(INIT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                if (toolFuture.isCompletedExceptionally()) {
+                    return createErrorResult("Server initialization failed. Check logs for details.");
+                }
+                return createErrorResult("Server is still initializing, please retry in a few seconds.");
             }
 
             // Convert arguments map to JSON string for our tool

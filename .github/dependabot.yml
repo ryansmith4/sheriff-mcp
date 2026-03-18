@@ -17,7 +17,6 @@ updates:
         patterns:
           - "org.junit*"
           - "org.assertj*"
-          - "ch.qos.logback*"
       gradle-minor:
         patterns:
           - "*"

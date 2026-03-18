@@ -95,6 +95,8 @@ tasks.jar {
 
 tasks.register<Jar>("fatJar") {
     archiveClassifier.set("all")
+    // EXCLUDE is intentional: this project does not use ServiceLoader or Jackson module
+    // auto-discovery. If service file merging becomes needed, switch to the Shadow plugin.
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         attributes["Main-Class"] = "com.guidedbyte.sheriff.SheriffApplication"
@@ -148,9 +150,9 @@ spotless {
     }
 }
 
-tasks.named("compileJava") {
-    dependsOn("spotlessApply")
-}
+// Note: CI runs spotlessCheck explicitly. Developers should run spotlessApply manually
+// or via a pre-commit hook. Auto-formatting on compile is intentionally disabled to
+// avoid masking formatting violations in CI.
 
 // Jib container image configuration
 jib {
