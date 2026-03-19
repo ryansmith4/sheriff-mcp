@@ -22,7 +22,7 @@ The `done` action marks issues as fixed or skipped. This updates Sheriff's datab
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `fps` | array | Yes | Array of fingerprints to mark |
-| `status` | string | Yes | Either `"fixed"` or `"skip"` (aliases: `"fix"`/`"f"`, `"skipped"`/`"s"`) |
+| `status` | string | Yes | `"fixed"` or `"skip"` (the server also accepts aliases `"fix"`/`"f"`, `"skipped"`/`"s"`, but schema-validating clients may only accept the canonical values) |
 
 ## Response
 

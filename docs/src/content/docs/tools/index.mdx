@@ -75,7 +75,7 @@ All responses use abbreviated field names to minimize token usage:
 | `fp` | Fingerprint (unique issue ID) |
 | `loc` | Location (line:column) |
 | `msg` | Message |
-| `sev` | Severity (H/M/L) |
+| `sev` | Severity — `H`/`M`/`L` in issue objects, full names in `summary` breakdowns |
 | `snip` | Code snippet |
 | `rem` | Remaining issues |
 | `remF` | Remaining files (in `next` response) |
@@ -83,7 +83,7 @@ All responses use abbreviated field names to minimize token usage:
 | `prog` | Progress object |
 
 <Aside type="tip">
-The abbreviated format reduces context usage by ~40% compared to verbose field names.
+The abbreviated format significantly reduces context usage compared to verbose field names.
 </Aside>
 
 ## Workflow Overview
@@ -133,3 +133,12 @@ flowchart TD
 - `progress` — Check how many issues remain
 - `reopen` — Undo a fixed/skipped mark
 - `export` — Save remaining issues to file
+
+## Common Errors
+
+These errors can occur for any action:
+
+| Error Code | Cause | Solution |
+|------------|-------|----------|
+| `INVALID_ACTION` | Unknown action name | Use one of: `load`, `next`, `done`, `progress`, `reopen`, `summary`, `export` |
+| `JSON_ERROR` | Malformed JSON arguments | Check argument syntax |

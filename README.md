@@ -39,6 +39,7 @@ Sheriff works with any tool that produces [SARIF](https://sarifweb.azurewebsites
 | **Bandit** | Python | `bandit -f sarif` |
 | **Checkov** | IaC | `checkov -o sarif` |
 | **Trivy** | Container/IaC | `trivy --format sarif` |
+| **SonarQube** | Multi-language | Built-in SARIF export |
 
 ---
 

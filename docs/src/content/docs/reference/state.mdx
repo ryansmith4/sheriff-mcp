@@ -100,7 +100,7 @@ When a new SARIF file is loaded (different content):
 Sheriff uses H2 embedded database with three tables:
 
 ### Meta Table
-Key-value store for session metadata (SARIF path, content hash, timestamps).
+Key-value store for session metadata and internal state (SARIF path, content hash, timestamps, schema version).
 
 | Column | Type | Description |
 |--------|------|-------------|
@@ -125,8 +125,17 @@ Key-value store for session metadata (SARIF path, content hash, timestamps).
 |--------|------|-------------|
 | `fp` | VARCHAR(64) | Primary key (fingerprint) |
 | `status` | CHAR(1) NOT NULL | `F` (fixed), `S` (skipped) |
-| `ts` | TIMESTAMP | When the status was set |
+| `ts` | TIMESTAMP DEFAULT CURRENT_TIMESTAMP | When the status was set |
 | `note` | TEXT | Optional note |
+
+### Indexes
+
+| Index | Table | Column |
+|-------|-------|--------|
+| `idx_issues_rule` | issues | rule |
+| `idx_issues_file` | issues | file |
+| `idx_issues_sev` | issues | sev |
+| `idx_progress_status` | progress | status |
 
 ## Troubleshooting
 

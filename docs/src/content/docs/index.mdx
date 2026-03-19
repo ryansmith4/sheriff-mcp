@@ -72,7 +72,7 @@ Sheriff works with any tool that produces SARIF output:
 <Steps>
 1. **Run static analysis** - Generate SARIF output from your tool of choice
 2. **Load into Sheriff** - `sheriff load target="results.sarif"`
-3. **Get next file's issues** - `sheriff next` returns all issues in one file
+3. **Get next file's issues** - `sheriff next` returns a batch of issues from one file (default limit: 25)
 4. **Fix all issues in file** - Edit the code to resolve each issue
 5. **Mark as done** - `sheriff done fps=[...] status="fixed"`
 6. **Repeat** - Until `remaining = 0`
