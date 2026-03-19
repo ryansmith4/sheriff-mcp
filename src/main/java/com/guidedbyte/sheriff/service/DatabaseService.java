@@ -55,7 +55,18 @@ public class DatabaseService implements AutoCloseable {
         String url = "jdbc:h2:" + dbPath + ";MODE=PostgreSQL";
 
         log.info("Connecting to database: {}", dbPath);
-        this.connection = DriverManager.getConnection(url);
+        try {
+            this.connection = DriverManager.getConnection(url);
+        } catch (SQLException e) {
+            // H2 error code 90020 = database file locked by another process
+            if (e.getErrorCode() == 90020) {
+                throw new SQLException(
+                        "Another Sheriff instance is already using this database: " + dbPath
+                                + ". Close the other instance or use a different working directory.",
+                        e);
+            }
+            throw e;
+        }
 
         initializeSchema();
     }

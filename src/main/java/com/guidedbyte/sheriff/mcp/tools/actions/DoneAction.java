@@ -103,7 +103,10 @@ public class DoneAction {
             }
 
             if (validFingerprints.isEmpty()) {
-                return new ErrorResponse("INVALID_FINGERPRINT", "None of the provided fingerprints exist");
+                return new ErrorResponse(
+                        "INVALID_FINGERPRINT",
+                        "None of the provided fingerprints exist. "
+                                + "If the SARIF data was recently reloaded, use 'next' to get current fingerprints.");
             }
 
             // Mark issues

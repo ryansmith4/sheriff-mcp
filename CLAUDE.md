@@ -127,6 +127,19 @@ Use these prefixes for automatic changelog generation:
 2. **File-based batching** - Issues grouped by file for efficient agent workflow
 3. **Compact JSON responses** - Abbreviated field names to minimize context usage
 4. **H2 embedded database** - Persistent state survives restarts
+5. **Two-phase startup** - MCP transport starts immediately; DB init deferred to background thread
+6. **Serialized tool execution** - All tool calls synchronized to prevent concurrent DB access
+
+## Concurrency
+
+- Tool calls are serialized via `synchronized` on `SheriffTool.execute()` — the H2 embedded database uses a single shared Connection that is not thread-safe
+- Multiple Claude Code instances on the same codebase will fail with a clear error (H2 file lock)
+- If SARIF data is reloaded while agents are working, stale fingerprints in `done` calls will return a descriptive error
+
+## Troubleshooting
+
+- **Database locked error**: Another Sheriff instance is using the `.sheriff/` database. Close the other instance or use a different working directory.
+- **Corrupt database**: Delete the `.sheriff/` directory and reload the SARIF file. All progress will be reset.
 
 ## Testing
 

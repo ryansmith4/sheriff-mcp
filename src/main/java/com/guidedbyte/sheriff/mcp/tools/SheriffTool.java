@@ -88,10 +88,17 @@ public class SheriffTool {
     /**
      * Executes the tool with the given arguments.
      *
+     * <p>Synchronized to ensure thread safety: the MCP SDK dispatches tool calls on
+     * separate threads, but the H2 embedded database uses a single shared Connection
+     * that is not thread-safe. Serializing all tool calls prevents autoCommit race
+     * conditions, duplicate batch returns, and concurrent load/done conflicts.
+     * The performance impact is negligible — DB operations take milliseconds while
+     * agent think time between calls is seconds to minutes.
+     *
      * @param arguments JSON arguments from MCP
      * @return JSON response string
      */
-    public String execute(String arguments) {
+    public synchronized String execute(String arguments) {
         log.debug(
                 "Executing sheriff tool with arguments: {}",
                 arguments != null ? arguments.replace("\n", "").replace("\r", "") : "null");
