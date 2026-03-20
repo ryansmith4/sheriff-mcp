@@ -3,7 +3,6 @@
   --sl-color-accent: #d97706;
   --sl-color-accent-high: #fcd34d;
   --sl-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --sl-content-width: 70rem;
 }
 
 /* ── Layout: maximize content pane, shrink TOC sidebar ───────────────── */
@@ -13,13 +12,27 @@
     flex-grow: 1 !important;
   }
 
+  /* Remove the content max-width cap so it fills the main-pane naturally */
+  .content-panel .sl-container {
+    max-width: none;
+  }
+
   .right-sidebar-container {
-    width: 14rem !important;
+    width: 16rem !important;
     flex-shrink: 0 !important;
   }
 
   .right-sidebar {
-    width: 14rem !important;
+    width: 16rem !important;
+  }
+
+  /* Override the sl-container inside the right sidebar — its width is
+     derived from --sl-sidebar-width (18.75rem) which controls both sidebars.
+     We shrink the right sidebar but can't change the variable without
+     also shrinking the left sidebar. */
+  .right-sidebar-panel .sl-container {
+    width: 100% !important;
+    max-width: 100% !important;
   }
 }
 
