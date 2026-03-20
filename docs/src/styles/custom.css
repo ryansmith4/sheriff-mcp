@@ -18,6 +18,12 @@
     justify-content: center;
   }
 
+  /* Widen search bar to half the center column */
+  .header > :nth-child(2) button {
+    max-width: 50% !important;
+    width: 50% !important;
+  }
+
   /* Keep right group (GitHub icon, theme toggle) right-aligned */
   .header > :nth-child(3) {
     justify-self: end;
