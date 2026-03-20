@@ -8,6 +8,21 @@
 /* ── Layout: maximize content pane, shrink TOC sidebar ───────────────── */
 
 @media (min-width: 72rem) {
+  /* Align header grid with the page layout below — match left sidebar
+     width and right TOC sidebar width for visual alignment */
+  .header {
+    grid-template-columns: var(--sl-sidebar-width) 1fr 16rem !important;
+  }
+
+  .header > :nth-child(2) {
+    justify-content: center;
+  }
+
+  /* Keep right group (GitHub icon, theme toggle) right-aligned */
+  .header > :nth-child(3) {
+    justify-self: end;
+  }
+
   .main-pane {
     flex-grow: 1 !important;
   }
