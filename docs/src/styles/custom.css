@@ -3,7 +3,24 @@
   --sl-color-accent: #d97706;
   --sl-color-accent-high: #fcd34d;
   --sl-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --sl-content-width: 52rem;
+  --sl-content-width: 70rem;
+}
+
+/* ── Layout: maximize content pane, shrink TOC sidebar ───────────────── */
+
+@media (min-width: 72rem) {
+  .main-pane {
+    flex-grow: 1 !important;
+  }
+
+  .right-sidebar-container {
+    width: 14rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  .right-sidebar {
+    width: 14rem !important;
+  }
 }
 
 [data-theme='dark'] {
