@@ -82,6 +82,10 @@ cosign verify ghcr.io/ryansmith4/sheriff-mcp:latest \
   --certificate-identity-regexp="github.com/ryansmith4/sheriff-mcp"
 ```
 
+## Git Workflow
+
+GitHub is configured to **squash-and-merge** PRs. After a PR merges, use `git branch -D branch` (force delete) to clean up local branches — `git branch -d` will fail because the squashed commit has a different SHA than the branch's original commits.
+
 ### Conventional Commits
 
 Use these prefixes for automatic changelog generation:

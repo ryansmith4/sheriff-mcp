@@ -8,6 +8,8 @@ plugins {
     id("org.jreleaser") version "1.22.0"
     id("com.google.cloud.tools.jib") version "3.5.3"
     id("pl.allegro.tech.build.axion-release") version "1.21.1"
+    id("org.cyclonedx.bom") version "2.3.0"
+    id("com.github.jk1.dependency-license-report") version "2.9"
 }
 
 group = "com.guidedbyte"
@@ -189,6 +191,7 @@ jib {
                 "org.opencontainers.image.url" to "https://github.com/ryansmith4/sheriff-mcp",
                 "org.opencontainers.image.source" to "https://github.com/ryansmith4/sheriff-mcp",
                 "org.opencontainers.image.licenses" to "Apache-2.0",
+                "org.opencontainers.image.version" to version.toString(),
                 "io.modelcontextprotocol.server.name" to "io.github.ryansmith4/sheriff-mcp",
             ),
         )
@@ -202,6 +205,28 @@ scmVersion {
         prefix.set("v")
         initialVersion.set({ _, _ -> "1.0.0" })
     }
+}
+
+// Dependency license report
+licenseReport {
+    renderers =
+        arrayOf(
+            com.github.jk1.license.render
+                .TextReportRenderer(),
+            com.github.jk1.license.render
+                .JsonReportRenderer(),
+        )
+    filters =
+        arrayOf(
+            com.github.jk1.license.filter
+                .LicenseBundleNormalizer(),
+        )
+    allowedLicensesFile = file("config/allowed-licenses.json")
+}
+
+// CycloneDX SBOM generation
+tasks.named("cyclonedxBom") {
+    mustRunAfter("fatJar")
 }
 
 // JReleaser configuration
@@ -251,6 +276,13 @@ jreleaser {
             artifact {
                 path.set(file("build/libs/sheriff-mcp-$version-all.jar"))
             }
+        }
+    }
+
+    files {
+        artifact {
+            path.set(file("build/reports/bom.json"))
+            extraProperties.put("skipSigning", true)
         }
     }
 }

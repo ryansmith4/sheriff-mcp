@@ -2,6 +2,7 @@
 # Sheriff-MCP
 
 [![CI](https://github.com/ryansmith4/sheriff-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/ryansmith4/sheriff-mcp/actions/workflows/ci.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/ryansmith4/sheriff-mcp/badge)](https://scorecard.dev/viewer/?uri=github.com/ryansmith4/sheriff-mcp)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Java 21+](https://img.shields.io/badge/Java-21%2B-blue.svg)](https://openjdk.org/projects/jdk/21/)
 [![GitHub release](https://img.shields.io/github/v/release/ryansmith4/sheriff-mcp)](https://github.com/ryansmith4/sheriff-mcp/releases)
@@ -130,7 +131,7 @@ Agent: sheriff next scope={rule: "ConstantValue"}
 
 Agent: [reads Service.java, fixes all 3 issues]
 
-Agent: sheriff done fps=["88d32cab", "ab1c2d3e", "f9e8d7c6"] status="fixed"
+Agent: sheriff done fps=["88d32cab35478753", "ab1c2d3e12345678", "f9e8d7c6a1b2c3d4"] status="fixed"
        → 3 marked fixed, 19 remaining
 
        ... continues until remaining = 0

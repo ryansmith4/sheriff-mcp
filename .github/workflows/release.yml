@@ -7,9 +7,10 @@ on:
 
 permissions:
   contents: write
-  id-token: write   # Required for Sigstore OIDC signing and MCP Registry
-  packages: write   # Required for ghcr.io Docker push
+  id-token: write       # Required for Sigstore OIDC signing, SLSA provenance, and MCP Registry
+  packages: write       # Required for ghcr.io Docker push
   pull-requests: write  # Required for README update PR
+  attestations: write   # Required for GitHub artifact attestations
 
 jobs:
   release:
@@ -35,11 +36,24 @@ jobs:
       - name: Build fat JAR
         run: ./gradlew fatJar
 
+      - name: Generate SBOM
+        run: ./gradlew cyclonedxBom
+
       - name: Run JReleaser
         run: ./gradlew jreleaserFullRelease
         env:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JRELEASER_COSIGN_EXPERIMENTAL: true
+
+      - name: Attest JAR provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: build/libs/sheriff-mcp-*-all.jar
+
+      - name: Attest SBOM
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: build/reports/bom.json
 
   docker:
     needs: release
@@ -79,6 +93,32 @@ jobs:
           DIGEST=$(cat build/jib-image.digest)
           echo "Signing ${IMAGE}@${DIGEST}"
           cosign sign --yes "${IMAGE}@${DIGEST}"
+
+      - name: Read image digest
+        id: digest
+        run: echo "digest=$(cat build/jib-image.digest)" >> "$GITHUB_OUTPUT"
+
+      - name: Attest Docker image provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/ryansmith4/sheriff-mcp
+          subject-digest: ${{ steps.digest.outputs.digest }}
+          push-to-registry: true
+
+      - name: Generate container SBOM
+        run: |
+          IMAGE="ghcr.io/ryansmith4/sheriff-mcp"
+          DIGEST=$(cat build/jib-image.digest)
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+          syft "${IMAGE}@${DIGEST}" -o cyclonedx-json=container-sbom.json
+
+      - name: Attest container SBOM
+        uses: actions/attest-sbom@v2
+        with:
+          subject-name: ghcr.io/ryansmith4/sheriff-mcp
+          subject-digest: ${{ steps.digest.outputs.digest }}
+          sbom-path: container-sbom.json
+          push-to-registry: true
 
   mcp-registry:
     needs: docker

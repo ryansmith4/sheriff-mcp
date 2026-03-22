@@ -37,6 +37,9 @@ jobs:
       - name: Build fat JAR
         run: ./gradlew fatJar
 
+      - name: Check dependency licenses
+        run: ./gradlew checkLicense --no-configuration-cache
+
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         if: matrix.os == 'ubuntu-latest'
@@ -61,6 +64,22 @@ jobs:
         with:
           name: sheriff-mcp-jar
           path: build/libs/*-all.jar
+
+  dependency-review:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: always
 
   dependency-submission:
     runs-on: ubuntu-latest

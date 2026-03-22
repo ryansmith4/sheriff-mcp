@@ -11,7 +11,7 @@ updates:
       - "dependencies"
       - "java"
     commit-message:
-      prefix: "deps"
+      prefix: "build"
     groups:
       testing:
         patterns:

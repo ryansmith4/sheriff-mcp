@@ -43,19 +43,19 @@ The `reopen` action undoes fixed or skipped marks, returning issues to pending s
 ### Undo Accidental Mark
 Marked the wrong issue? Reopen it:
 ```json
-{"action": "reopen", "fps": ["88d32cab"]}
+{"action": "reopen", "fps": ["88d32cab35478753"]}
 ```
 
 ### Revisit Skipped Issues
 Previously skipped as false positive, but now want to fix:
 ```json
-{"action": "reopen", "fps": ["xyz12345", "abc67890"]}
+{"action": "reopen", "fps": ["xyz1234567890abc", "abc6789012345def"]}
 ```
 
 ### Re-examine After Discussion
 User decided an issue needs fixing after all:
 ```json
-{"action": "reopen", "fps": ["88d32cab"]}
+{"action": "reopen", "fps": ["88d32cab35478753"]}
 // Issue returns to pending, will appear in next `next` call
 ```
 

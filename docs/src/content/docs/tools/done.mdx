@@ -45,13 +45,13 @@ The `done` action marks issues as fixed or skipped. This updates Sheriff's datab
 ### `fixed`
 Use when you've resolved the issue in the code:
 ```json
-{"action": "done", "fps": ["88d32cab"], "status": "fixed"}
+{"action": "done", "fps": ["88d32cab35478753"], "status": "fixed"}
 ```
 
 ### `skip`
 Use for false positives or issues you choose not to fix:
 ```json
-{"action": "done", "fps": ["ab1c2d3e"], "status": "skip"}
+{"action": "done", "fps": ["ab1c2d3e12345678"], "status": "skip"}
 ```
 
 <Aside type="tip">
@@ -73,7 +73,7 @@ Marking false positives as `skip` prevents them from appearing in future `next` 
 ```json
 {
   "action": "done",
-  "fps": ["88d32cab", "ab1c2d3e", "f9e8d7c6"],
+  "fps": ["88d32cab35478753", "ab1c2d3e12345678", "f9e8d7c6a1b2c3d4"],
   "status": "fixed"
 }
 ```
@@ -82,7 +82,7 @@ Marking false positives as `skip` prevents them from appearing in future `next` 
 ```json
 {
   "action": "done",
-  "fps": ["xyz12345"],
+  "fps": ["xyz1234567890abc"],
   "status": "skip"
 }
 ```
@@ -98,7 +98,8 @@ Fix all issues in a file before calling `done`:
 ### Use Full Fingerprints
 Always use the full fingerprint string returned by the `next` action. Sheriff performs exact matching on fingerprints:
 ```json
-{"fps": ["88d32cab35478753"]}
+{"fps": ["88d32cab35478753"]}  ✓ Full fingerprint
+{"fps": ["88d32cab"]}          ✗ Truncated — won't match
 ```
 
 <Aside type="caution">

@@ -3,7 +3,7 @@ title: Sheriff
 description: AI-powered static analysis issue fixer - MCP server for SARIF reports
 template: splash
 hero:
-  tagline: AI agents struggle with large static analysis reports. Sheriff makes them efficient.
+  tagline: An MCP server that turns static analysis reports into a managed work queue for AI agents — batching issues by file, tracking fixes, and persisting progress across sessions.
   actions:
     - text: Get Started
       link: /sheriff-mcp/getting-started/installation/
@@ -18,17 +18,17 @@ import { Card, CardGrid, LinkCard, Aside, Steps } from '@astrojs/starlight/compo
 
 ## The Problem
 
-AI agents struggle with large static analysis reports:
+AI agents can handle a handful of static analysis issues directly. But when reports grow to **dozens or hundreds of issues**, things break down:
 
 <CardGrid>
   <Card title="Context Overload" icon="warning">
-    100+ issues overwhelm context windows, causing agents to lose track of progress
+    Large issue lists overwhelm context windows, causing agents to lose track of what's been fixed
   </Card>
   <Card title="Lost Progress" icon="close">
-    Work is lost on context compaction or session restart
+    Work is lost on context compaction or session restart — there's no external record of progress
   </Card>
   <Card title="Inefficient Navigation" icon="random">
-    No batching means jumping between files repeatedly, wasting tokens
+    Without batching, agents jump between files repeatedly, wasting tokens and missing issues
   </Card>
 </CardGrid>
 
@@ -61,7 +61,7 @@ Sheriff works with any tool that produces SARIF output:
 | **Semgrep** | Multi-language | `semgrep --sarif -o results.sarif` |
 | **ESLint** | JavaScript/TypeScript | `eslint --format @microsoft/sarif` |
 | **CodeQL** | Multi-language | Built-in SARIF output |
-| **SonarQube** | Multi-language | Export as SARIF (via plugin) |
+| **SonarQube** | Multi-language | Built-in SARIF export |
 | **SpotBugs** | Java | `spotbugs -sarif` |
 | **Bandit** | Python | `bandit -f sarif` |
 | **Checkov** | IaC | `checkov -o sarif` |
@@ -91,7 +91,7 @@ Agent: sheriff next scope={rule: "ConstantValue"}
 
 Agent: [reads Service.java, fixes all 3 issues]
 
-Agent: sheriff done fps=["88d32cab", "ab1c2d3e", "f9e8d7c6"] status="fixed"
+Agent: sheriff done fps=["88d32cab35478753", "ab1c2d3e12345678", "f9e8d7c6a1b2c3d4"] status="fixed"
        → 3 marked fixed, 19 remaining
 
 Agent: sheriff next scope={rule: "ConstantValue"}

@@ -1,0 +1,95 @@
+---
+title: FAQ & Common Scenarios
+description: Frequently asked questions and common scenarios when using Sheriff
+sidebar:
+  order: 2
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## What happens if I rescan mid-fix?
+
+**All progress resets.** Sheriff detects SARIF changes using a content hash. When you re-run static analysis, the SARIF file changes — even if the same issues remain — because line numbers shift, snippets change, and fingerprints are regenerated.
+
+When you call `load` with a changed SARIF file:
+
+1. Sheriff detects a different content hash
+2. Prior progress counts are captured for the response
+3. The issues and progress tables are cleared
+4. New issues from the updated SARIF are loaded
+5. You start fresh with all issues in "pending" state
+
+<Aside type="caution">
+This is by design — stale fingerprints can't reliably map to new issues after code changes. Complete a full fix pass before rescanning.
+</Aside>
+
+**Recommended workflow:**
+```
+1. Run static analysis → generate SARIF
+2. Load into Sheriff → fix all issues (or all you plan to fix)
+3. Rescan → load new SARIF → fix any new/remaining issues
+4. Repeat until clean
+```
+
+## What happens when I reload the same SARIF file?
+
+If the SARIF file content is identical (same SHA-256 hash), Sheriff **preserves all progress**. This is how state survives across:
+
+- Context compaction (agent's context window truncates)
+- Session restarts (you close and reopen the MCP client)
+- Agent switches (a different AI agent picks up the work)
+
+The agent simply calls `load` again with the same file, and Sheriff responds with the existing progress. Detection is based on content hash, not filename — renaming the file doesn't affect it.
+
+## Can I load multiple SARIF files?
+
+Yes. You can either:
+
+- **Load a directory:** Pass a directory path to `load` and Sheriff will scan up to 2 levels deep for `.sarif` and `.sarif.json` files, combining all issues into a single session.
+  ```json
+  {"action": "load", "target": "build/reports/"}
+  ```
+
+- **Load files sequentially:** Each `load` replaces the previous session. If you need issues from multiple files combined, place them in a directory and load the directory.
+
+<Aside type="note">
+There is no way to incrementally add issues from a second SARIF file to an existing session. Each `load` starts a fresh session (unless the content hash matches the current session).
+</Aside>
+
+## Can multiple agents or instances use Sheriff simultaneously?
+
+**No.** Sheriff uses an embedded H2 database with a file lock. Only one Sheriff instance can access the `.sheriff/` directory at a time. A second instance will fail with a clear "database locked" error.
+
+However, agents can work **sequentially** — one agent makes progress, ends its session, and another picks up where it left off by calling `load` with the same SARIF file.
+
+## What if a `done` call uses a stale fingerprint?
+
+If you call `done` with a fingerprint that doesn't exist in the current session (e.g., from a previous SARIF load), Sheriff returns a descriptive error. No data is corrupted — the call simply has no effect for that fingerprint.
+
+## When should I NOT use Sheriff?
+
+Sheriff adds value when the number of issues exceeds what an AI agent can track in its context window. Consider skipping Sheriff when:
+
+- **Small reports (< 10 issues):** The agent can handle these directly from the SARIF file without a work queue.
+- **One-off sessions:** If you'll fix everything in a single sitting without interruption, the persistence benefit doesn't apply.
+- **Review only:** If you just want to browse issues without fixing them, reading the SARIF directly or using your analysis tool's UI is simpler.
+- **Continuous integration:** Sheriff is designed for interactive fix sessions, not automated CI/CD pipelines.
+
+Sheriff is most valuable when you have **dozens to hundreds of issues** across many files, expect the work to span **multiple sessions or agents**, or want to **focus on specific categories** using scope filtering.
+
+## How does Sheriff identify issues?
+
+Sheriff uses the `partialFingerprints` field from the SARIF specification. Most static analysis tools generate these as stable hashes based on the rule, file, and code context — so the same issue produces the same fingerprint across runs *if the code hasn't changed*.
+
+If your analysis tool doesn't produce fingerprints, Sheriff falls back to generating them from available fields (rule + file + line + message).
+
+## Does Sheriff modify my code?
+
+No. Sheriff is read-only with respect to your codebase. It reads the SARIF file, stores issues in its own `.sheriff/` database, and communicates with the AI agent via MCP. The agent is what reads and edits your source files.
+
+## Can I use Sheriff without an AI agent?
+
+Sheriff is designed as an MCP server for AI agents, but the `status` CLI command and `export` action can be useful standalone:
+
+- `sheriff status` — Check current session progress from the command line
+- `export` action — Write remaining issues to a JSON or text file for manual review

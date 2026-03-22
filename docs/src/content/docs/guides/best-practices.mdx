@@ -1,6 +1,8 @@
 ---
 title: Best Practices
 description: Tips for efficient static analysis fixing with Sheriff
+sidebar:
+  order: 1
 ---
 
 import { Aside, Steps } from '@astrojs/starlight/components';
@@ -88,7 +90,7 @@ When fixing multiple issues in a file, work from top to bottom. This minimizes l
 Don't leave false positives unmarked—they'll keep appearing:
 
 ```json
-{"action": "done", "fps": ["fp123"], "status": "skip"}
+{"action": "done", "fps": ["fp12345678901234"], "status": "skip"}
 ```
 
 ### Document Skip Reasons

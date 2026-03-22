@@ -48,6 +48,13 @@ Mount your project directory so Sheriff can access SARIF files and persist state
   }
 }
 ```
+
+<Aside type="note">
+The `-v ".:/data"` flag mounts your current project directory as `/data` inside the container. Sheriff's working directory is `/data`, so:
+- **SARIF paths** are relative to your project root (e.g., `load target="build/results.sarif"`)
+- **State directory** (`.sheriff/`) is created inside your project directory via the mount
+- **Export files** are written to your project directory
+</Aside>
   </TabItem>
 </Tabs>
 
@@ -58,7 +65,7 @@ Add the following to your project's `CLAUDE.md`, `copilot-instructions.md`, or e
 ```markdown
 ## Static Analysis with Sheriff
 
-This project uses Sheriff for managing static analysis fixes.
+This project uses Sheriff MCP server for managing static analysis issue fixes.
 
 ### Workflow
 
@@ -68,12 +75,12 @@ This project uses Sheriff for managing static analysis fixes.
 4. Mark done: `sheriff done fps=["fp1", "fp2"] status="fixed"`
 5. Repeat until `remaining = 0`
 
-### Important
+### Rules
 
-- Fix all issues in a file before calling `next` again
-- Use `status="skip"` for false positives
-- Use snippet matching (not line numbers) to locate issues after edits
-- Don't rescan until the full fix pass is complete
+- Fix ALL issues in a file before calling `next` again — partial fixes waste a tool call
+- Use snippet matching (not line numbers) to locate issues — line numbers shift after edits
+- Mark false positives as `skip`, not `fixed` — keeps fix counts accurate
+- Don't rescan until the full fix pass is complete — rescanning resets all progress
 ```
 
 <Aside type="tip">

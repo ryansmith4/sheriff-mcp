@@ -5,15 +5,15 @@ description: Overview of Sheriff and how to get started
 
 import { LinkCard, CardGrid, Aside } from '@astrojs/starlight/components';
 
-Sheriff is an MCP server that helps AI agents efficiently fix static analysis issues from SARIF reports.
+Sheriff is an MCP server that helps AI agents efficiently fix static analysis issues from [SARIF](https://sarifweb.azurewebsites.net/) (Static Analysis Results Interchange Format) reports — the standard output format supported by most static analysis tools.
 
 ## Why Sheriff?
 
-When AI agents work with large static analysis reports, they face several challenges:
+AI agents can fix a few static analysis issues directly from a SARIF file. But when reports contain **dozens to hundreds of issues** across many files, agents hit a wall:
 
-- **Context overload** - Hundreds of issues overwhelm the context window
-- **Lost progress** - Work disappears on context compaction or session restart
-- **Inefficient navigation** - Jumping between files repeatedly wastes tokens
+- **Context overload** - Large issue lists overwhelm the context window and agents lose track of progress
+- **Lost progress** - Work disappears on context compaction or session restart with no external record
+- **Inefficient navigation** - Jumping between files repeatedly wastes tokens and increases the chance of missing issues
 
 Sheriff solves these problems by providing:
 
