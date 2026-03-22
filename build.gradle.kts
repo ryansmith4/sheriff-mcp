@@ -253,15 +253,10 @@ jreleaser {
         inceptionYear.set("2026")
     }
 
+    // Signing is handled by GitHub Actions attestations (actions/attest-build-provenance)
+    // and cosign in the docker job, not by JReleaser's built-in signing.
     signing {
-        active.set(org.jreleaser.model.Active.ALWAYS)
-        pgp {
-            active.set(org.jreleaser.model.Active.NEVER)
-        }
-        cosign {
-            active.set(org.jreleaser.model.Active.ALWAYS)
-            version.set("2.4.3")
-        }
+        active.set(org.jreleaser.model.Active.NEVER)
     }
 
     release {

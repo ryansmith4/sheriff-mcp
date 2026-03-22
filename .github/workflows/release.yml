@@ -40,10 +40,9 @@ jobs:
         run: ./gradlew cyclonedxDirectBom
 
       - name: Run JReleaser
-        run: ./gradlew jreleaserFullRelease --no-configuration-cache --stacktrace
+        run: ./gradlew jreleaserFullRelease --no-configuration-cache
         env:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COSIGN_EXPERIMENTAL: "1"
 
       - name: Attest JAR provenance
         uses: actions/attest-build-provenance@v4
