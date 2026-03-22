@@ -7,7 +7,6 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "postinstall": "patch-package",
     "astro": "astro"
   },
   "dependencies": {
@@ -16,8 +15,5 @@
     "astro-mermaid": "^2.0.1",
     "mermaid": "^11.13.0",
     "sharp": "^0.34.5"
-  },
-  "devDependencies": {
-    "patch-package": "^8.0.1"
   }
 }

@@ -15,6 +15,7 @@
     { "moduleLicense": "Revised BSD License" },
     { "moduleLicense": "Eclipse Public License - v 1.0" },
     { "moduleLicense": "Eclipse Public License v2.0" },
+    { "moduleLicense": "Eclipse Public License - v 2.0" },
     { "moduleLicense": "Eclipse Public License 2.0" },
     { "moduleLicense": "EPL 1.0" },
     { "moduleLicense": "EPL-1.0" },
@@ -27,6 +28,7 @@
     { "moduleLicense": "Public Domain" },
     { "moduleLicense": "CC0-1.0" },
     { "moduleLicense": "LGPL-2.1-only" },
-    { "moduleLicense": "GNU Lesser General Public License" }
+    { "moduleLicense": "GNU Lesser General Public License" },
+    { "moduleLicense": "GNU LESSER GENERAL PUBLIC LICENSE, Version 2.1" }
   ]
 }
