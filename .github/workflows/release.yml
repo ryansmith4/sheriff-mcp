@@ -40,7 +40,7 @@ jobs:
         run: ./gradlew cyclonedxDirectBom
 
       - name: Run JReleaser
-        run: ./gradlew jreleaserFullRelease
+        run: ./gradlew jreleaserFullRelease --no-configuration-cache
         env:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JRELEASER_COSIGN_EXPERIMENTAL: true
