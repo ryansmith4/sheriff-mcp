@@ -5,7 +5,7 @@ plugins {
     application
     jacoco
     id("com.diffplug.spotless") version "8.4.0"
-    id("org.jreleaser") version "1.23.0"
+    id("org.jreleaser") version "1.22.0"
     id("com.google.cloud.tools.jib") version "3.5.3"
     id("pl.allegro.tech.build.axion-release") version "1.21.1"
     id("org.cyclonedx.bom") version "3.2.2"
