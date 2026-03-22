@@ -2,9 +2,6 @@ name: Deploy Documentation
 
 on:
   push:
-    branches: [main]
-    paths:
-      - 'docs/**'
     tags:
       - 'v*'
   workflow_dispatch:
@@ -21,8 +18,21 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v6
+
+      - name: Verify this is the latest release
+        run: |
+          CURRENT_TAG="${GITHUB_REF_NAME}"
+          LATEST_TAG=$(git tag -l 'v*' --sort=-v:refname | head -1)
+          echo "Current tag: ${CURRENT_TAG}"
+          echo "Latest tag: ${LATEST_TAG}"
+          if [ "${CURRENT_TAG}" != "${LATEST_TAG}" ]; then
+            echo "::error::Skipping docs deploy — ${CURRENT_TAG} is not the latest release (${LATEST_TAG})"
+            exit 1
+          fi
+        if: github.event_name == 'push'
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
