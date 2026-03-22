@@ -83,6 +83,9 @@ jobs:
           JIB_USERNAME: ${{ github.actor }}
           JIB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Log in to ghcr.io
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
       - name: Install cosign
         uses: sigstore/cosign-installer@v3
 
@@ -92,6 +95,8 @@ jobs:
           DIGEST=$(cat build/jib-image.digest)
           echo "Signing ${IMAGE}@${DIGEST}"
           cosign sign --yes "${IMAGE}@${DIGEST}"
+        env:
+          COSIGN_EXPERIMENTAL: "1"
 
       - name: Read image digest
         id: digest
