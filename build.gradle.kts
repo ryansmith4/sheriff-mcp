@@ -12,6 +12,17 @@ plugins {
     id("com.github.jk1.dependency-license-report") version "3.1.1"
 }
 
+// Force JGit 6.x for JReleaser compatibility — JReleaser 1.22.0 uses
+// GpgObjectSigner which was removed in JGit 7.x, but the axion-release
+// plugin pulls in JGit 7.5.0 which wins the version conflict.
+buildscript {
+    configurations.classpath {
+        resolutionStrategy {
+            force("org.eclipse.jgit:org.eclipse.jgit:6.10.0.202406032230-r")
+        }
+    }
+}
+
 group = "com.guidedbyte"
 version = scmVersion.version
 
