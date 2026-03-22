@@ -8,7 +8,7 @@ plugins {
     id("org.jreleaser") version "1.22.0"
     id("com.google.cloud.tools.jib") version "3.5.3"
     id("pl.allegro.tech.build.axion-release") version "1.21.1"
-    id("org.cyclonedx.bom") version "2.3.0"
+    id("org.cyclonedx.bom") version "3.2.2"
     id("com.github.jk1.dependency-license-report") version "2.9"
 }
 
