@@ -5,7 +5,7 @@ plugins {
     application
     jacoco
     id("com.diffplug.spotless") version "8.4.0"
-    id("org.jreleaser") version "1.22.0"
+    id("org.jreleaser") version "1.23.0"
     id("com.google.cloud.tools.jib") version "3.5.3"
     id("pl.allegro.tech.build.axion-release") version "1.21.1"
     id("org.cyclonedx.bom") version "3.2.2"
@@ -27,18 +27,18 @@ repositories {
 
 dependencies {
     // MCP Server (transitively provides jackson-databind)
-    implementation("io.modelcontextprotocol.sdk:mcp-core:1.0.0")
-    implementation("io.modelcontextprotocol.sdk:mcp-json-jackson2:1.0.0")
+    implementation("io.modelcontextprotocol.sdk:mcp-core:1.1.0")
+    implementation("io.modelcontextprotocol.sdk:mcp-json-jackson2:1.1.0")
 
     // Embedded database
-    implementation("com.h2database:h2:2.3.232")
+    implementation("com.h2database:h2:2.4.240")
 
     // CLI
-    implementation("info.picocli:picocli:4.7.6")
-    annotationProcessor("info.picocli:picocli-codegen:4.7.6")
+    implementation("info.picocli:picocli:4.7.7")
+    annotationProcessor("info.picocli:picocli-codegen:4.7.7")
 
     // Logging (slf4j-api provided transitively by logback and MCP SDK)
-    implementation("ch.qos.logback:logback-classic:1.5.15")
+    implementation("ch.qos.logback:logback-classic:1.5.32")
 
     // Testing
     testImplementation("org.junit.jupiter:junit-jupiter:6.0.3")
