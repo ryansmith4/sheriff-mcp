@@ -160,8 +160,8 @@ public class ExportAction {
                 return null;
             }
 
-            // On Windows, also check for absolute paths like C:\
-            if (requestedPath.isAbsolute()) {
+            // Check for absolute paths (Unix / or Windows C:\ style)
+            if (requestedPath.isAbsolute() || outputPath.matches("^[a-zA-Z]:.*")) {
                 log.warn("Rejected absolute path: {}", outputPath);
                 return null;
             }
