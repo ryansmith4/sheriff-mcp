@@ -8,7 +8,7 @@ plugins {
     id("org.jreleaser") version "1.22.0"
     id("com.google.cloud.tools.jib") version "3.5.3"
     id("pl.allegro.tech.build.axion-release") version "1.21.1"
-    id("org.cyclonedx.bom") version "2.3.0"
+    id("org.cyclonedx.bom") version "3.2.2"
     id("com.github.jk1.dependency-license-report") version "3.1.1"
 }
 
@@ -225,7 +225,7 @@ licenseReport {
 }
 
 // CycloneDX SBOM generation
-tasks.named("cyclonedxBom") {
+tasks.named("cyclonedxDirectBom") {
     mustRunAfter("fatJar")
 }
 
@@ -281,7 +281,7 @@ jreleaser {
 
     files {
         artifact {
-            path.set(file("build/reports/bom.json"))
+            path.set(file("build/reports/cyclonedx-direct/bom.json"))
             extraProperties.put("skipSigning", true)
         }
     }

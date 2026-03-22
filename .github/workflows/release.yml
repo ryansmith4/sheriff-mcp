@@ -37,7 +37,7 @@ jobs:
         run: ./gradlew fatJar
 
       - name: Generate SBOM
-        run: ./gradlew cyclonedxBom
+        run: ./gradlew cyclonedxDirectBom
 
       - name: Run JReleaser
         run: ./gradlew jreleaserFullRelease
@@ -53,7 +53,7 @@ jobs:
       - name: Attest SBOM
         uses: actions/attest-build-provenance@v2
         with:
-          subject-path: build/reports/bom.json
+          subject-path: build/reports/cyclonedx-direct/bom.json
 
   docker:
     needs: release
