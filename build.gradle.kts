@@ -255,9 +255,12 @@ jreleaser {
 
     signing {
         active.set(org.jreleaser.model.Active.ALWAYS)
-        mode.set(org.jreleaser.model.Signing.Mode.COSIGN)
+        pgp {
+            active.set(org.jreleaser.model.Active.NEVER)
+        }
         cosign {
             active.set(org.jreleaser.model.Active.ALWAYS)
+            version.set("2.4.3")
         }
     }
 
