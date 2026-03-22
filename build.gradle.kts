@@ -255,6 +255,7 @@ jreleaser {
 
     signing {
         active.set(org.jreleaser.model.Active.ALWAYS)
+        mode.set(org.jreleaser.model.Signing.Mode.COSIGN)
         cosign {
             active.set(org.jreleaser.model.Active.ALWAYS)
         }
