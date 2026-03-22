@@ -79,7 +79,7 @@ jobs:
       - name: Build and push Docker image
         run: |
           MAJOR=$(echo "${{ steps.version.outputs.version }}" | cut -d. -f1)
-          ./gradlew jib -Djib.to.tags=${{ steps.version.outputs.version }},$MAJOR,latest
+          ./gradlew jib -Djib.to.tags=${{ steps.version.outputs.version }},$MAJOR,latest --no-configuration-cache
         env:
           JIB_USERNAME: ${{ github.actor }}
           JIB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
