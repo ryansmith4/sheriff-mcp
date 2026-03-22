@@ -41,14 +41,14 @@ jobs:
         run: ./gradlew checkLicense --no-configuration-cache
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: matrix.os == 'ubuntu-latest'
         with:
           name: coverage-report
           path: build/reports/jacoco/test/html/
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: test-results-${{ matrix.os }}
@@ -59,7 +59,7 @@ jobs:
         run: ./gradlew jibBuildTar -Djib.from.platforms=linux/amd64 --no-configuration-cache
 
       - name: Upload JAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: matrix.os == 'ubuntu-latest'
         with:
           name: sheriff-mcp-jar

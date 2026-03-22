@@ -46,12 +46,12 @@ jobs:
           JRELEASER_COSIGN_EXPERIMENTAL: true
 
       - name: Attest JAR provenance
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: build/libs/sheriff-mcp-*-all.jar
 
       - name: Attest SBOM
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: build/reports/cyclonedx-direct/bom.json
 
@@ -99,7 +99,7 @@ jobs:
         run: echo "digest=$(cat build/jib-image.digest)" >> "$GITHUB_OUTPUT"
 
       - name: Attest Docker image provenance
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-name: ghcr.io/ryansmith4/sheriff-mcp
           subject-digest: ${{ steps.digest.outputs.digest }}
@@ -113,7 +113,7 @@ jobs:
           syft "${IMAGE}@${DIGEST}" -o cyclonedx-json=container-sbom.json
 
       - name: Attest container SBOM
-        uses: actions/attest-sbom@v2
+        uses: actions/attest-sbom@v4
         with:
           subject-name: ghcr.io/ryansmith4/sheriff-mcp
           subject-digest: ${{ steps.digest.outputs.digest }}
@@ -169,7 +169,7 @@ jobs:
           sed -i 's/VERSION=[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/VERSION=${{ steps.version.outputs.version }}/g' README.md
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "docs: update README version to ${{ steps.version.outputs.version }}"
           title: "docs: update README version to ${{ steps.version.outputs.version }}"
