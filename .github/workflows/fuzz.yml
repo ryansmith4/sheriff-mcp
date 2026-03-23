@@ -26,7 +26,12 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5
 
+      - name: Run fuzz regression tests
+        if: github.event_name != 'schedule'
+        run: ./gradlew test --tests '*FuzzTest'
+
       - name: Run fuzz tests
+        if: github.event_name == 'schedule'
         run: ./gradlew test --tests '*FuzzTest'
         env:
           JAZZER_FUZZ: 1
