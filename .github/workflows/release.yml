@@ -17,18 +17,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0  # Full history for changelog generation
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
         with:
           java-version: '21'
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5
 
       - name: Build and test
         run: ./gradlew build
@@ -44,13 +44,31 @@ jobs:
         env:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Install cosign
+        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
+
+      - name: Sign JAR with Sigstore
+        run: |
+          JAR=$(ls build/libs/sheriff-mcp-*-all.jar)
+          JAR_NAME=$(basename "$JAR")
+          cosign sign-blob --yes --bundle "${JAR_NAME}.sigstore.json" "$JAR"
+
+      - name: Sign SBOM with Sigstore
+        run: |
+          cosign sign-blob --yes --bundle "bom.json.sigstore.json" build/reports/cyclonedx-direct/bom.json
+
+      - name: Upload signatures to release
+        run: gh release upload "${{ github.ref_name }}" *.sigstore.json --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Attest JAR provenance
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4
         with:
           subject-path: build/libs/sheriff-mcp-*-all.jar
 
       - name: Attest SBOM
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4
         with:
           subject-path: build/reports/cyclonedx-direct/bom.json
 
@@ -60,20 +78,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Extract version from tag
         id: version
         run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
         with:
           java-version: '21'
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5
 
       - name: Build and push Docker image
         run: |
@@ -87,7 +105,7 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3
+        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
 
       - name: Sign Docker image with Sigstore
         run: |
@@ -103,7 +121,7 @@ jobs:
         run: echo "digest=$(cat build/jib-image.digest)" >> "$GITHUB_OUTPUT"
 
       - name: Attest Docker image provenance
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4
         with:
           subject-name: ghcr.io/ryansmith4/sheriff-mcp
           subject-digest: ${{ steps.digest.outputs.digest }}
@@ -117,7 +135,7 @@ jobs:
           syft "${IMAGE}@${DIGEST}" -o cyclonedx-json=container-sbom.json
 
       - name: Attest container SBOM
-        uses: actions/attest-sbom@v4
+        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4
         with:
           subject-name: ghcr.io/ryansmith4/sheriff-mcp
           subject-digest: ${{ steps.digest.outputs.digest }}
@@ -130,7 +148,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Extract version from tag
         id: version
@@ -159,7 +177,7 @@ jobs:
     if: ${{ !contains(github.ref_name, '-') }}  # Skip pre-releases
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           ref: main
 
@@ -173,7 +191,7 @@ jobs:
           sed -i 's/VERSION=[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/VERSION=${{ steps.version.outputs.version }}/g' README.md
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8
         with:
           commit-message: "docs: update README version to ${{ steps.version.outputs.version }}"
           title: "docs: update README version to ${{ steps.version.outputs.version }}"

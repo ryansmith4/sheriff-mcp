@@ -120,7 +120,11 @@ public class SarifParser {
         } else if (Files.isDirectory(path)) {
             try (var stream = Files.walk(path, 2)) {
                 stream.filter(p -> {
-                            String name = p.getFileName().toString();
+                            Path fileName = p.getFileName();
+                            if (fileName == null) {
+                                return false;
+                            }
+                            String name = fileName.toString();
                             return name.endsWith(".sarif") || name.endsWith(".sarif.json");
                         })
                         .forEach(files::add);

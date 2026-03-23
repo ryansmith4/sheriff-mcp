@@ -39,6 +39,9 @@ public final class FingerprintMatcher {
      * Generates a short fingerprint (16 chars) from a string.
      */
     public static String hash(String input) {
+        if (input == null) {
+            input = "";
+        }
         MessageDigest md;
         try {
             md = MessageDigest.getInstance("SHA-256");

@@ -5,14 +5,14 @@ plugins {
     application
     jacoco
     id("com.diffplug.spotless") version "8.4.0"
-    id("org.jreleaser") version "1.22.0"
+    id("org.jreleaser") version "1.23.0"
     id("com.google.cloud.tools.jib") version "3.5.3"
     id("pl.allegro.tech.build.axion-release") version "1.21.1"
     id("org.cyclonedx.bom") version "3.2.2"
     id("com.github.jk1.dependency-license-report") version "3.1.1"
 }
 
-// Force JGit 6.x for JReleaser compatibility — JReleaser 1.22.0 uses
+// Force JGit 6.x for JReleaser compatibility — JReleaser 1.23.0 uses
 // GpgObjectSigner which was removed in JGit 7.x, but the axion-release
 // plugin pulls in JGit 7.5.0 which wins the version conflict.
 buildscript {
@@ -37,6 +37,9 @@ repositories {
 }
 
 dependencies {
+    // Force Jackson 2.21.2+ to fix CVE in jackson-core async parser (DoS via number length bypass)
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.21.2"))
+
     // MCP Server (transitively provides jackson-databind)
     implementation("io.modelcontextprotocol.sdk:mcp-core:1.1.0")
     implementation("io.modelcontextprotocol.sdk:mcp-json-jackson2:1.1.0")
@@ -55,6 +58,9 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:6.0.3")
     testImplementation("org.assertj:assertj-core:3.27.7")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // Fuzz testing
+    testImplementation("com.code-intelligence:jazzer-junit:0.22.1")
 }
 
 application {
