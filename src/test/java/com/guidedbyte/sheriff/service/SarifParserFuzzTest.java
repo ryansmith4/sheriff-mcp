@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import com.code_intelligence.jazzer.api.FuzzedDataProvider;
 import com.code_intelligence.jazzer.junit.FuzzTest;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -48,8 +49,8 @@ class SarifParserFuzzTest {
     }
 
     @FuzzTest(maxDuration = "5m")
-    void fuzzFindSarifFiles(byte[] data) {
-        String input = new String(data);
+    void fuzzFindSarifFiles(FuzzedDataProvider data) {
+        String input = data.consumeRemainingAsString();
 
         SarifParser parser = new SarifParser();
         try {
