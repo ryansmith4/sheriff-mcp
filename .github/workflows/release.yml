@@ -128,11 +128,11 @@ jobs:
           push-to-registry: true
 
       - name: Generate container SBOM
-        run: |
-          IMAGE="ghcr.io/ryansmith4/sheriff-mcp"
-          DIGEST=$(cat build/jib-image.digest)
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
-          syft "${IMAGE}@${DIGEST}" -o cyclonedx-json=container-sbom.json
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          image: ghcr.io/ryansmith4/sheriff-mcp@${{ steps.digest.outputs.digest }}
+          format: cyclonedx-json
+          output-file: container-sbom.json
 
       - name: Attest container SBOM
         uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4
