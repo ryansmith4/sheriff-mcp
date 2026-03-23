@@ -86,6 +86,19 @@ cosign verify ghcr.io/ryansmith4/sheriff-mcp:latest \
 
 GitHub is configured to **squash-and-merge** PRs. After a PR merges, use `git branch -D branch` (force delete) to clean up local branches — `git branch -d` will fail because the squashed commit has a different SHA than the branch's original commits.
 
+### Creating Pull Requests
+
+Branch protection requires 1 reviewer approval. To enable the human developer to review and approve PRs created by Claude Code, PRs must be authored by the `sheriff-mcp-bot` GitHub App:
+
+```bash
+BOT_TOKEN=$(py C:/Users/RyanSmith/.claude/github-apps/get-token.py)
+GH_TOKEN=$BOT_TOKEN gh pr create --title "..." --body "..."
+```
+
+- **Git commits**: Use normal `git` commands (committed as the developer)
+- **PR creation only**: Use `GH_TOKEN=$BOT_TOKEN gh pr create` (authored by bot)
+- The developer can then review and approve the bot-authored PR on GitHub
+
 ### Conventional Commits
 
 Use these prefixes for automatic changelog generation:
