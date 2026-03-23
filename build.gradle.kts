@@ -55,6 +55,9 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:6.0.3")
     testImplementation("org.assertj:assertj-core:3.27.7")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // Fuzz testing
+    testImplementation("com.code-intelligence:jazzer-junit:0.22.1")
 }
 
 application {
