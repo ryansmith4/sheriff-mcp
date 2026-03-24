@@ -51,7 +51,7 @@ Sheriff works with any tool that produces [SARIF](https://sarifweb.azurewebsites
 <details>
 <summary><strong>JAR (All Platforms)</strong> — Requires Java 21+</summary>
 
-Download `sheriff-mcp-1.0.0-all.jar` from [Releases](https://github.com/ryansmith4/sheriff-mcp/releases).
+Download `sheriff-mcp-1.0.1-all.jar` from [Releases](https://github.com/ryansmith4/sheriff-mcp/releases).
 
 </details>
 
@@ -82,7 +82,7 @@ Add Sheriff to your MCP client (Claude Code, Cursor, ChatGPT Desktop, etc.):
   "mcpServers": {
     "sheriff": {
       "command": "java",
-      "args": ["-jar", "/path/to/sheriff-mcp-1.0.0-all.jar", "start"]
+      "args": ["-jar", "/path/to/sheriff-mcp-1.0.1-all.jar", "start"]
     }
   }
 }
@@ -145,7 +145,7 @@ All release artifacts are signed with [Sigstore](https://sigstore.dev/) for supp
 
 **Verify JAR:**
 ```bash
-VERSION=1.0.0
+VERSION=1.0.1
 cosign verify-blob \
   --signature sheriff-mcp-${VERSION}-all.jar.sig \
   --certificate sheriff-mcp-${VERSION}-all.jar.pem \
