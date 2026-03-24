@@ -39,6 +39,13 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Replace version placeholders
+        if: github.event_name == 'push'
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "Replacing X.Y.Z with ${VERSION} in docs"
+          find docs/src -name '*.mdx' -o -name '*.md' | xargs sed -i "s/X\.Y\.Z/${VERSION}/g"
+
       - name: Install dependencies
         working-directory: docs
         run: npm ci
