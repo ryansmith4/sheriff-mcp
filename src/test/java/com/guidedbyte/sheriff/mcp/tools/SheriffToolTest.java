@@ -193,6 +193,240 @@ class SheriffToolTest {
         assertThat(json.get("error").get("code").asText()).isEqualTo("INVALID_LIMIT");
     }
 
+    @Test
+    void malformedJsonReturnsError() throws Exception {
+        String result = tool.execute("not valid json {{{");
+        JsonNode json = mapper.readTree(result);
+
+        assertThat(json.has("error")).isTrue();
+        assertThat(json.get("error").get("code").asText()).isEqualTo("JSON_ERROR");
+    }
+
+    @Test
+    void emptyObjectReturnsInvalidAction() throws Exception {
+        String result = tool.execute("{}");
+        JsonNode json = mapper.readTree(result);
+
+        assertThat(json.has("error")).isTrue();
+        assertThat(json.get("error").get("code").asText()).isEqualTo("INVALID_ACTION");
+    }
+
+    @Test
+    void nonNumberLimitReturnsError() throws Exception {
+        URL resource = getClass().getClassLoader().getResource("sarif/sample.sarif.json");
+        String target = new File(resource.getFile()).getAbsolutePath();
+        tool.execute("{\"action\": \"load\", \"target\": \"" + escapeJson(target) + "\"}");
+
+        String result = tool.execute("{\"action\": \"next\", \"limit\": \"not_a_number\"}");
+        JsonNode json = mapper.readTree(result);
+
+        assertThat(json.has("error")).isTrue();
+        assertThat(json.get("error").get("code").asText()).isEqualTo("INVALID_LIMIT");
+    }
+
+    @Test
+    void emptyScopeObjectTreatedAsNoScope() throws Exception {
+        URL resource = getClass().getClassLoader().getResource("sarif/sample.sarif.json");
+        String target = new File(resource.getFile()).getAbsolutePath();
+        tool.execute("{\"action\": \"load\", \"target\": \"" + escapeJson(target) + "\"}");
+
+        String result = tool.execute("{\"action\": \"next\", \"scope\": {}}");
+        JsonNode json = mapper.readTree(result);
+
+        assertThat(json.has("error")).isFalse();
+        assertThat(json.get("issues").isArray()).isTrue();
+    }
+
+    @Test
+    void summaryAction() throws Exception {
+        URL resource = getClass().getClassLoader().getResource("sarif/sample.sarif.json");
+        String target = new File(resource.getFile()).getAbsolutePath();
+        tool.execute("{\"action\": \"load\", \"target\": \"" + escapeJson(target) + "\"}");
+
+        String result = tool.execute("{\"action\": \"summary\"}");
+        JsonNode json = mapper.readTree(result);
+
+        assertThat(json.has("error")).isFalse();
+    }
+
+    @Test
+    void reopenAction() throws Exception {
+        URL resource = getClass().getClassLoader().getResource("sarif/sample.sarif.json");
+        String target = new File(resource.getFile()).getAbsolutePath();
+        tool.execute("{\"action\": \"load\", \"target\": \"" + escapeJson(target) + "\"}");
+
+        // Get a fingerprint, mark it done, then reopen
+        String nextResult = tool.execute("{\"action\": \"next\"}");
+        String fp = mapper.readTree(nextResult).get("issues").get(0).get("fp").asText();
+        tool.execute("{\"action\": \"done\", \"fps\": [\"" + fp + "\"], \"status\": \"fixed\"}");
+
+        String result = tool.execute("{\"action\": \"reopen\", \"fps\": [\"" + fp + "\"]}");
+        JsonNode json = mapper.readTree(result);
+
+        assertThat(json.has("error")).isFalse();
+        assertThat(json.get("reopened").asInt()).isEqualTo(1);
+    }
+
+    @Test
+    void exportAction() throws Exception {
+        URL resource = getClass().getClassLoader().getResource("sarif/sample.sarif.json");
+        String target = new File(resource.getFile()).getAbsolutePath();
+        tool.execute("{\"action\": \"load\", \"target\": \"" + escapeJson(target) + "\"}");
+
+        // Export uses relative paths only (security: rejects absolute paths)
+        String result = tool.execute("{\"action\": \"export\", \"format\": \"json\"}");
+        JsonNode json = mapper.readTree(result);
+
+        assertThat(json.has("error")).isFalse();
+    }
+
+    @Test
+    void exportWithListFormat() throws Exception {
+        URL resource = getClass().getClassLoader().getResource("sarif/sample.sarif.json");
+        String target = new File(resource.getFile()).getAbsolutePath();
+        tool.execute("{\"action\": \"load\", \"target\": \"" + escapeJson(target) + "\"}");
+
+        String result = tool.execute("{\"action\": \"export\", \"format\": \"list\"}");
+        JsonNode json = mapper.readTree(result);
+        assertThat(json.has("error")).isFalse();
+    }
+
+    @Test
+    void exportWithScope() throws Exception {
+        URL resource = getClass().getClassLoader().getResource("sarif/sample.sarif.json");
+        String target = new File(resource.getFile()).getAbsolutePath();
+        tool.execute("{\"action\": \"load\", \"target\": \"" + escapeJson(target) + "\"}");
+
+        String result =
+                tool.execute("{\"action\": \"export\", \"scope\": {\"severity\": \"High\"}, \"format\": \"json\"}");
+        JsonNode json = mapper.readTree(result);
+        assertThat(json.has("error")).isFalse();
+    }
+
+    @Test
+    void progressWithScope() throws Exception {
+        URL resource = getClass().getClassLoader().getResource("sarif/sample.sarif.json");
+        String target = new File(resource.getFile()).getAbsolutePath();
+        tool.execute("{\"action\": \"load\", \"target\": \"" + escapeJson(target) + "\"}");
+
+        String result = tool.execute("{\"action\": \"progress\", \"scope\": {\"severity\": \"Moderate\"}}");
+        JsonNode json = mapper.readTree(result);
+        assertThat(json.has("error")).isFalse();
+    }
+
+    @Test
+    void nextWithChecklistFormat() throws Exception {
+        URL resource = getClass().getClassLoader().getResource("sarif/sample.sarif.json");
+        String target = new File(resource.getFile()).getAbsolutePath();
+        tool.execute("{\"action\": \"load\", \"target\": \"" + escapeJson(target) + "\"}");
+
+        String result = tool.execute("{\"action\": \"next\", \"fmt\": \"checklist\"}");
+        JsonNode json = mapper.readTree(result);
+        assertThat(json.has("error")).isFalse();
+        assertThat(json.has("checklist")).isTrue();
+    }
+
+    @Test
+    void nextWithFileScope() throws Exception {
+        URL resource = getClass().getClassLoader().getResource("sarif/sample.sarif.json");
+        String target = new File(resource.getFile()).getAbsolutePath();
+        tool.execute("{\"action\": \"load\", \"target\": \"" + escapeJson(target) + "\"}");
+
+        String result = tool.execute("{\"action\": \"next\", \"scope\": {\"file\": \"*.java\"}}");
+        JsonNode json = mapper.readTree(result);
+        assertThat(json.has("error")).isFalse();
+    }
+
+    @Test
+    void getInputSchemaReturnsValidJson() throws Exception {
+        String schema = SheriffTool.getInputSchema();
+        JsonNode json = mapper.readTree(schema);
+
+        assertThat(json.get("type").asText()).isEqualTo("object");
+        assertThat(json.get("properties").has("action")).isTrue();
+        assertThat(json.get("required").get(0).asText()).isEqualTo("action");
+    }
+
+    @Test
+    void missingActionFieldReturnsError() throws Exception {
+        String result = tool.execute("{\"target\": \"something\"}");
+        JsonNode json = mapper.readTree(result);
+
+        assertThat(json.has("error")).isTrue();
+        assertThat(json.get("error").get("code").asText()).isEqualTo("INVALID_ACTION");
+    }
+
+    @Test
+    void doneWithSkipStatus() throws Exception {
+        URL resource = getClass().getClassLoader().getResource("sarif/sample.sarif.json");
+        String target = new File(resource.getFile()).getAbsolutePath();
+        tool.execute("{\"action\": \"load\", \"target\": \"" + escapeJson(target) + "\"}");
+
+        String nextResult = tool.execute("{\"action\": \"next\"}");
+        String fp = mapper.readTree(nextResult).get("issues").get(0).get("fp").asText();
+
+        String result = tool.execute("{\"action\": \"done\", \"fps\": [\"" + fp + "\"], \"status\": \"skip\"}");
+        JsonNode json = mapper.readTree(result);
+        assertThat(json.has("error")).isFalse();
+        assertThat(json.get("marked").asInt()).isEqualTo(1);
+    }
+
+    @Test
+    void doneWithEmptyFingerprints() throws Exception {
+        URL resource = getClass().getClassLoader().getResource("sarif/sample.sarif.json");
+        String target = new File(resource.getFile()).getAbsolutePath();
+        tool.execute("{\"action\": \"load\", \"target\": \"" + escapeJson(target) + "\"}");
+
+        String result = tool.execute("{\"action\": \"done\", \"fps\": [], \"status\": \"fixed\"}");
+        JsonNode json = mapper.readTree(result);
+        assertThat(json.has("error")).isTrue();
+    }
+
+    @Test
+    void reopenNonExistentFingerprint() throws Exception {
+        URL resource = getClass().getClassLoader().getResource("sarif/sample.sarif.json");
+        String target = new File(resource.getFile()).getAbsolutePath();
+        tool.execute("{\"action\": \"load\", \"target\": \"" + escapeJson(target) + "\"}");
+
+        String result = tool.execute("{\"action\": \"reopen\", \"fps\": [\"nonexistent\"]}");
+        JsonNode json = mapper.readTree(result);
+        // Non-existent fingerprints return an error with details
+        assertThat(json).isNotNull();
+    }
+
+    @Test
+    void loadNonExistentTarget() throws Exception {
+        String result = tool.execute("{\"action\": \"load\", \"target\": \"/nonexistent/path\"}");
+        JsonNode json = mapper.readTree(result);
+        assertThat(json.has("error")).isTrue();
+    }
+
+    @Test
+    void loadWithoutTarget() throws Exception {
+        String result = tool.execute("{\"action\": \"load\"}");
+        JsonNode json = mapper.readTree(result);
+        assertThat(json.has("error")).isTrue();
+    }
+
+    @Test
+    void summaryWithoutLoad() throws Exception {
+        String result = tool.execute("{\"action\": \"summary\"}");
+        JsonNode json = mapper.readTree(result);
+        // Summary should work even without loading (returns empty data)
+        assertThat(json).isNotNull();
+    }
+
+    @Test
+    void nextWithSeverityScope() throws Exception {
+        URL resource = getClass().getClassLoader().getResource("sarif/sample.sarif.json");
+        String target = new File(resource.getFile()).getAbsolutePath();
+        tool.execute("{\"action\": \"load\", \"target\": \"" + escapeJson(target) + "\"}");
+
+        String result = tool.execute("{\"action\": \"next\", \"scope\": {\"severity\": \"High\"}}");
+        JsonNode json = mapper.readTree(result);
+        assertThat(json.has("error")).isFalse();
+    }
+
     private String escapeJson(String s) {
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }

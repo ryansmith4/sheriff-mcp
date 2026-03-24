@@ -31,6 +31,7 @@ jobs:
         uses: github/codeql-action/init@38697555549f1db7851b81482ff19f1fa5c4fedc # v4
         with:
           languages: java-kotlin
+          queries: security-extended
           build-mode: manual
 
       - name: Setup Gradle

@@ -75,6 +75,12 @@ class GlobMatcherTest {
             assertThat(GlobMatcher.matches("src/main", "src\\main\\File.java")).isTrue();
             assertThat(GlobMatcher.matches("src\\main", "src/main/File.java")).isTrue();
         }
+
+        @Test
+        void matches_shouldRejectOverlyLongPattern() {
+            String longPattern = "*" + "a".repeat(201) + "*";
+            assertThat(GlobMatcher.matches(longPattern, "test")).isFalse();
+        }
     }
 
     @Nested
@@ -129,6 +135,18 @@ class GlobMatcherTest {
         void matchesRule_shouldMatchWildcardMiddle() {
             assertThat(GlobMatcher.matchesRule("Const*Value", "ConstantValue")).isTrue();
             assertThat(GlobMatcher.matchesRule("Const*Value", "ConstValue")).isTrue();
+        }
+
+        @Test
+        void matchesRule_shouldMatchMultipleWildcards() {
+            assertThat(GlobMatcher.matchesRule("*Const**Value*", "MyConstantValueCheck"))
+                    .isTrue();
+        }
+
+        @Test
+        void matchesRule_shouldHandleSpecialRegexChars() {
+            assertThat(GlobMatcher.matchesRule("rule.name", "rule.name")).isTrue();
+            assertThat(GlobMatcher.matchesRule("rule.name", "rulexname")).isFalse();
         }
     }
 }
