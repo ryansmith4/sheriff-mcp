@@ -3,6 +3,7 @@
 
 [![CI](https://github.com/ryansmith4/sheriff-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/ryansmith4/sheriff-mcp/actions/workflows/ci.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/ryansmith4/sheriff-mcp/badge)](https://scorecard.dev/viewer/?uri=github.com/ryansmith4/sheriff-mcp)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/12244/badge)](https://www.bestpractices.dev/projects/12244)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Java 21+](https://img.shields.io/badge/Java-21%2B-blue.svg)](https://openjdk.org/projects/jdk/21/)
 [![GitHub release](https://img.shields.io/github/v/release/ryansmith4/sheriff-mcp)](https://github.com/ryansmith4/sheriff-mcp/releases)
