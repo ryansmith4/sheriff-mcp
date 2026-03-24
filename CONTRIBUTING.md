@@ -33,6 +33,34 @@ cd sheriff-mcp
 ./gradlew test
 ```
 
+### Local CodeQL Analysis (Optional)
+
+You can run the same CodeQL security analysis locally that runs in CI. This is optional but recommended before pushing security-sensitive changes.
+
+**One-time setup:**
+
+1. Install the [GitHub CLI](https://cli.github.com/) if you don't have it
+2. Install the CodeQL extension:
+   ```bash
+   gh extension install github/gh-codeql
+   ```
+   The first run downloads the CodeQL CLI (~360MB).
+
+**Running the analysis:**
+
+```bash
+./scripts/codeql-local.sh
+```
+
+This creates a CodeQL database, runs the `security-extended` query suite (same as CI), and writes results to `build/codeql-results.sarif`. The script auto-detects your platform (Windows/macOS/Linux) and uses the appropriate Gradle wrapper.
+
+If `gh` or the CodeQL extension isn't installed, the script prints install instructions and exits cleanly — it won't block your workflow.
+
+**Viewing results:**
+
+- **VS Code**: Install the [SARIF Viewer](https://marketplace.visualstudio.com/items?itemName=MS-SarifVSCode.sarif-viewer) extension and open `build/codeql-results.sarif`
+- **GitHub**: Upload results with the command shown at the end of the script output
+
 ## Development Workflow
 
 ### 1. Fork and Clone

@@ -121,6 +121,7 @@ Use these prefixes for automatic changelog generation:
 ./gradlew jibBuildTar    # Build container image as tar (single-platform)
 ./gradlew currentVersion # Show current version derived from git tags
 ./gradlew release        # Tag a release (see Release Process above)
+./scripts/codeql-local.sh  # Run CodeQL security analysis locally (optional, requires gh codeql)
 ```
 
 ## Project Structure
