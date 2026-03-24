@@ -78,6 +78,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
+      contents: write      # Attach SBOM to GitHub Release
       packages: write      # ghcr.io Docker push
       id-token: write      # Cosign OIDC signing
       attestations: write  # Image and SBOM attestations
