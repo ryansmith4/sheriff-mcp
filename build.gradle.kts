@@ -60,7 +60,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // Fuzz testing
-    testImplementation("com.code-intelligence:jazzer-junit:0.22.1")
+    testImplementation("com.code-intelligence:jazzer-junit:0.30.0")
 }
 
 application {
