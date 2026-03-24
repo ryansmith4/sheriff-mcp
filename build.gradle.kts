@@ -13,12 +13,12 @@ plugins {
 }
 
 // Force JGit 6.x for JReleaser compatibility — JReleaser 1.23.0 uses
-// GpgObjectSigner which was removed in JGit 7.x, but the axion-release
-// plugin pulls in JGit 7.5.0 which wins the version conflict.
+// GpgObjectSigner which was removed in JGit 7.x (jreleaser/jreleaser#1846).
+// DO NOT accept Dependabot PRs that bump this to 7.x — it will break releases.
 buildscript {
     configurations.classpath {
         resolutionStrategy {
-            force("org.eclipse.jgit:org.eclipse.jgit:7.6.0.202603022253-r")
+            force("org.eclipse.jgit:org.eclipse.jgit:6.10.1.202505221210-r")
         }
     }
 }
