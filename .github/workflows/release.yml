@@ -180,7 +180,7 @@ jobs:
           ./mcp-publisher login github-oidc
           ./mcp-publisher publish
 
-  update-readme:
+  update-docs-version:
     runs-on: ubuntu-latest
     needs: release
     if: ${{ !contains(github.ref_name, '-') }}  # Skip pre-releases
@@ -203,14 +203,26 @@ jobs:
           sed -i 's/sheriff-mcp-[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/sheriff-mcp-${{ steps.version.outputs.version }}/g' README.md
           sed -i 's/VERSION=[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/VERSION=${{ steps.version.outputs.version }}/g' README.md
 
+      - name: Update version in docs
+        run: |
+          find docs/src -name '*.mdx' -o -name '*.md' | xargs sed -i 's/X\.Y\.Z/${{ steps.version.outputs.version }}/g'
+
+      - name: Generate bot token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
+        id: bot-token
+        with:
+          app-id: ${{ secrets.BOT_APP_ID }}
+          private-key: ${{ secrets.BOT_PRIVATE_KEY }}
+
       - name: Create pull request
         uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8
         with:
-          commit-message: "docs: update README version to ${{ steps.version.outputs.version }}"
-          title: "docs: update README version to ${{ steps.version.outputs.version }}"
+          token: ${{ steps.bot-token.outputs.token }}
+          commit-message: "docs: update version references to ${{ steps.version.outputs.version }}"
+          title: "docs: update version references to ${{ steps.version.outputs.version }}"
           body: |
             Automated version update from release `${{ github.ref_name }}`.
 
-            Updates JAR filename references in README.md to version `${{ steps.version.outputs.version }}`.
-          branch: readme-version-update
+            Updates version references in README.md and docs to `${{ steps.version.outputs.version }}`.
+          branch: docs-version-update
           delete-branch: true
