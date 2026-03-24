@@ -12,7 +12,7 @@ Sheriff provides a command-line interface for starting the MCP server and checki
 Start the MCP server using stdio transport:
 
 ```bash
-java -jar sheriff-mcp-X.Y.Z-all.jar start
+java -jar sheriff-mcp-1.0.2-all.jar start
 ```
 
 The server runs in the foreground and communicates via stdin/stdout (MCP stdio transport). It uses two-phase startup: the MCP transport begins listening immediately, while database initialization happens in the background. Tool calls received before initialization completes return a retry error.
@@ -43,7 +43,7 @@ Show version information:
 
 ```bash
 sheriff --version
-# Sheriff X.Y.Z
+# Sheriff 1.0.2
 ```
 
 ### `--help`
