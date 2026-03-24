@@ -106,6 +106,33 @@ tasks.jacocoTestReport {
     }
 }
 
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.jacocoTestReport)
+    classDirectories.setFrom(
+        classDirectories.files.map {
+            fileTree(it) {
+                // Exclude bootstrap/entry-point classes that can't be meaningfully unit tested
+                exclude(
+                    "com/guidedbyte/sheriff/SheriffApplication.class",
+                    "com/guidedbyte/sheriff/cli/**",
+                    "com/guidedbyte/sheriff/mcp/SheriffMcpServer.class",
+                )
+            }
+        },
+    )
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.check {
+    dependsOn(tasks.jacocoTestCoverageVerification)
+}
+
 tasks.jar {
     manifest {
         attributes["Main-Class"] = "com.guidedbyte.sheriff.SheriffApplication"
