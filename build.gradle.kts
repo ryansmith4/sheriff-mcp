@@ -8,8 +8,8 @@ plugins {
     id("org.jreleaser") version "1.23.0"
     id("com.google.cloud.tools.jib") version "3.5.3"
     id("pl.allegro.tech.build.axion-release") version "1.21.1"
-    id("org.cyclonedx.bom") version "3.2.2"
-    id("com.github.jk1.dependency-license-report") version "3.1.1"
+    id("org.cyclonedx.bom") version "3.2.3"
+    id("com.github.jk1.dependency-license-report") version "3.1.2"
 }
 
 // Force JGit 6.x for JReleaser compatibility — JReleaser 1.23.0 uses
@@ -41,8 +41,8 @@ dependencies {
     implementation(platform("com.fasterxml.jackson:jackson-bom:2.21.2"))
 
     // MCP Server (transitively provides jackson-databind)
-    implementation("io.modelcontextprotocol.sdk:mcp-core:1.1.0")
-    implementation("io.modelcontextprotocol.sdk:mcp-json-jackson2:1.1.0")
+    implementation("io.modelcontextprotocol.sdk:mcp-core:1.1.1")
+    implementation("io.modelcontextprotocol.sdk:mcp-json-jackson2:1.1.1")
 
     // Embedded database
     implementation("com.h2database:h2:2.4.240")
