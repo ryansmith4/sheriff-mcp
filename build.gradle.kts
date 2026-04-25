@@ -41,8 +41,8 @@ dependencies {
     implementation(platform("com.fasterxml.jackson:jackson-bom:2.21.2"))
 
     // MCP Server (transitively provides jackson-databind)
-    implementation("io.modelcontextprotocol.sdk:mcp-core:1.1.1")
-    implementation("io.modelcontextprotocol.sdk:mcp-json-jackson2:1.1.1")
+    implementation("io.modelcontextprotocol.sdk:mcp-core:1.1.2")
+    implementation("io.modelcontextprotocol.sdk:mcp-json-jackson2:1.1.2")
 
     // Embedded database
     implementation("com.h2database:h2:2.4.240")
