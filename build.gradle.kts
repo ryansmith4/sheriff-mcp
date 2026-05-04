@@ -5,10 +5,10 @@ plugins {
     application
     jacoco
     id("com.diffplug.spotless") version "8.4.0"
-    id("org.jreleaser") version "1.23.0"
+    id("org.jreleaser") version "1.24.0"
     id("com.google.cloud.tools.jib") version "3.5.3"
     id("pl.allegro.tech.build.axion-release") version "1.21.1"
-    id("org.cyclonedx.bom") version "3.2.3"
+    id("org.cyclonedx.bom") version "3.2.4"
     id("com.github.jk1.dependency-license-report") version "3.1.2"
 }
 
@@ -38,11 +38,11 @@ repositories {
 
 dependencies {
     // Force Jackson 2.21.2+ to fix CVE in jackson-core async parser (DoS via number length bypass)
-    implementation(platform("com.fasterxml.jackson:jackson-bom:2.21.2"))
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.21.3"))
 
     // MCP Server (transitively provides jackson-databind)
-    implementation("io.modelcontextprotocol.sdk:mcp-core:1.1.1")
-    implementation("io.modelcontextprotocol.sdk:mcp-json-jackson2:1.1.1")
+    implementation("io.modelcontextprotocol.sdk:mcp-core:1.1.2")
+    implementation("io.modelcontextprotocol.sdk:mcp-json-jackson2:1.1.2")
 
     // Embedded database
     implementation("com.h2database:h2:2.4.240")
